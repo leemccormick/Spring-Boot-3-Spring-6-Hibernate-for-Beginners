@@ -1,0 +1,61 @@
+<!--
+How to create validation Required Fields : STEP 3 : Develop HTML form and add validation support
+-->
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Registeration Form</title>
+
+    <style>
+        .error {color.red}
+    </style>
+</head>
+
+<body>
+<i>Fill out the form. Asterisk(*) means required.</i>
+<br><br>
+
+<!-- th:object="customer" : is from model attribute name on CustomerController in showForm() -->
+<form th:action="@{/processForm}" th:object="${customer}" method="POST">
+    First name: <input type="text" th:field="*{firstName}"/>
+    <br><br>
+
+    Last name (*): <input type="text" th:field="*{lastName}"/>
+
+    <!-- Add error message (if present) -->
+    <span th:if="${#fields.hasErrors('lastName')}"
+          th:errors="*{lastName}"
+          class="error"></span>
+    <br><br>
+
+    Free passes: <input type="text" th:field="*{freePasses}"/>
+
+    <!-- Add error message (if present) -->
+    <span th:if="${#fields.hasErrors('freePasses')}"
+          th:errors="*{freePasses}"
+          class="error"></span>
+    <br><br>
+
+    Postal Code: <input type="text" th:field="*{postalCode}"/>
+
+    <!-- Add error message (if present) -->
+    <span th:if="${#fields.hasErrors('postalCode')}"
+          th:errors="*{postalCode}"
+          class="error"></span>
+    <br><br>
+
+    Course Code: <input type="text" th:field="*{courseCode}"/>
+
+    <!-- Add error message (if present) -->
+    <span th:if="${#fields.hasErrors('courseCode')}"
+          th:errors="*{courseCode}"
+          class="error"></span>
+    <br><br>
+
+    <input type="submit" value="Submit"/>
+</form>
+
+</body>
+</html>
