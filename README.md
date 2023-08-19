@@ -14,7 +14,9 @@
 - Hibernate/JPA is an Object-to-Relational-Mapping (ORM) framework. It simplifies database access for Java applications. By using the framework, you can easily store and retrieve Java objects by setting up some simple configuration mappings.
 - This course covers basic Hibernate/JPA CRUD. Also, advanced Hibernate/JPA mappings are covered for one-to-one, one-to-many and many-to-many.
 
+## Source
+- [NEW] Spring Boot 3, Spring 6 & Hibernate for Beginners by Chad Darby
+- https://www.udemy.com/
 
-
-
-
+## FullStack Project by Lee McCormick
+Learning how to code fuels my passion. I derive immense satisfaction from acquiring new programming languages and employing my expertise to enhance the world we inhabit. This project was built by following the tutorial and source code online.
