@@ -5,54 +5,143 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS : Bootstrap is a popular open-source front-end framework that provides a collection of pre-built CSS (Cascading Style Sheets) and JavaScript components to help developers create responsive and visually appealing web applications and websites. It was originally developed by Twitter and is now maintained by the Bootstrap community. -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
     <title>MY STORE : Home Page</title>
+
+    <!-- Style CSS for the page -->
+    <style>
+        h1 {
+        background-color: black;
+        color: white;
+        font-size: 36px;
+        text-align: center;
+        padding: 20px;
+        }
+        .nav {
+        display: flex;
+        justify-content: flex-end;
+        background-color: #383838;
+        padding: 10x;
+        }
+        .nav-item {
+        color: white;
+        padding: 5px 10px;
+        margin: 0 5px;
+        border-radius: 5px;
+        }
+        .element-with-padding {
+        padding-left: 20px;
+        padding-right: 20px;
+        }
+       .button-container {
+       text-align: left;
+       }
+       .button {
+       display: inline-block;
+       padding-right: 20px;
+       border: none;
+       cursor: pointer;
+       border-radius: 5px;
+       }
+    </style>
 </head>
 
+<!-- BODY -->
 <body>
-<h2>MY STORE DEMO </h2>
-<hr>
+<h1>MY STORE DEMO </h1>
 
-<p>
-    Welcome to MY STORE Home Page
-</p>
-<hr>
+<!-- Navigation Section User Detail and Logout button -->
+<ul class="nav justify-content-end">
+    <li class="nav-item">Welcome ! <span th:text="${username}"></span></li>
 
-<!-- Display username and  role -->
-<p>
-<!--    User: <span sec:authentication="principal.username"></span>-->
-<!--    <br><br>-->
-<!--    Role(s): <span sec:authentication="principal.authorities"></span>-->
+    <li class="nav-item">
+        <form action="" th:action="@{/logout}" method="POST" class="form-horizontal">
+            <input type="submit" value="Logout"/>
+        </form>
+    </li>
+</ul>
 
-    User: <span sec:authentication="name"></span>
-    <br><br>
-    Role(s): <span sec:authentication="principal.authorities"></span>
-</p>
+<ul class="nav justify-content-end">
+    <li class="nav-item">Roles : <span th:text="${roles}"></span></li>
+</ul>
 
-<!-- *** Add a link to point to each role path ***
-* /sellers.. : this is for the sales
-* sec:authorize="hasRole('SALE') : Only display when user has a sales role
--->
-<div sec:authorize="hasRole('SALE')">
+<!-- SALE and Admin Navigation Link Section -->
+<hr th:if="${hasSaleRole || hasAdminRole}">
+<div class="element-with-padding" th:if="${hasSaleRole}">
     <p>
         <a th:href="@{/sellers}">Sale Meeting</a>
         (Only for Sale Peeps)
     </p>
 </div>
 
-<!-- * sec:authorize="hasRole('ADMIN') : Only display when user has a admin role -->
-<div sec:authorize="hasRole('ADMIN')">
-    <!-- *** Add a link to point to each role path **** /systems.. : this is for the admin -->
+<div class="element-with-padding" th:if="${hasAdminRole}">
     <p>
         <a th:href="@{/systems}">IT Systems Meeting</a>
         (Only for Admin Peeps)
     </p>
 </div>
-<hr>
+<hr th:if="${hasSaleRole || hasAdminRole}">
 
-<!-- Add Logout button -->
-<form action="" th:action="@{/logout}" method="POST" class="form-horizontal">
-    <input type="submit" value="Logout"/>
-</form>
+<!-- Add Product and Checkout Buttons Section -->
+<div class="element-with-padding">
+    <div class="button-container">
+        <div th:if="${hasSaleRole || hasAdminRole}" class="button">
+            <a class="btn btn-primary mb-3">
+                Add Product
+            </a>
+        </div>
 
+        <div th:if="${hasCustomerRole}" class="button">
+            <a class="btn btn-success mb-3">
+                Check out
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Product List Section -->
+<div class="element-with-padding">
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+        <tr>
+            <th>Product Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="tempProduct : ${products}">
+            <!-- Detail Section For Product -->
+            <td th:text="${tempProduct.name}"></td>
+            <td th:text="${tempProduct.description}"></td>
+            <td th:text="${tempProduct.price}"></td>
+
+            <!-- Action Buttons For Product -->
+            <td>
+                <a th:if="${hasCustomerRole}" class="btn btn-success btn-sm">
+                    Add To Card
+                </a>
+
+                <a th:if="${hasSaleRole || hasAdminRole}" class="btn btn-info btn-sm">
+                    Update
+                </a>
+
+                <a th:if="${hasAdminRole}"
+                   th:href="@{/deleteProduct(productId=${tempProduct.id})}"
+                   class="btn btn-danger btn-sm"
+                   onclick="if (!(confirm('Are you sure you want to delete this product?'))) return false">
+                    Delete
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
 </body>
 </html>
