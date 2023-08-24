@@ -42,13 +42,21 @@
                th:field="*{description}" required>
         <span th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></span>
 
-        <label style="padding-bottom: 10px;" for="price">Price :</label>
+        <label style="padding-bottom: 10px;" for="price">Price Per Unit :</label>
         <input class="form-control mb-4 w-25"
                placeholder="$00.00"
                type="text" id="price"
                name="price"
                th:field="*{price}" required>
         <span th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></span>
+
+        <label style="padding-bottom: 10px;" for="quality">Quality :</label>
+        <input class="form-control mb-4 w-25"
+               placeholder="$00.00"
+               type="text" id="quality"
+               name="quality"
+               th:field="*{quality}" required>
+        <span th:if="${#fields.hasErrors('quality')}" th:errors="*{quality}"></span>
 
         <button type="submit" class="btn btn-info col-2">Save</button>
     </form>

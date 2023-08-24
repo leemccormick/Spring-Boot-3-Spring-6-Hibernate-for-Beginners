@@ -112,7 +112,8 @@
         <tr>
             <th>Product Name</th>
             <th>Description</th>
-            <th>Price</th>
+            <th>Price Per Unit</th>
+            <th th:if="${hasSaleRole || hasAdminRole}">Quality</th>
             <th>Action</th>
         </tr>
         </thead>
@@ -123,6 +124,7 @@
             <td th:text="${tempProduct.name}"></td>
             <td th:text="${tempProduct.description}"></td>
             <td th:text="${tempProduct.price}"></td>
+            <td th:if="${hasSaleRole || hasAdminRole}" th:text="${tempProduct.quality}"></td>
 
             <!-- Action Buttons For Product -->
             <td>

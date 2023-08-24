@@ -3,18 +3,22 @@ package com.leemccormick.posdemo.service;
 import com.leemccormick.posdemo.dao.ProductRepository;
 import com.leemccormick.posdemo.entity.Product;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ProductServiceImpl implements ProductService {
     private ProductRepository productRepository;
+//    private Authentication authentication;
 
     @Autowired
     public ProductServiceImpl(ProductRepository theProductRepository) {
         productRepository = theProductRepository;
+       // authentication = theAuthentication;
     }
 
     @Override
@@ -45,6 +49,22 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void save(Product theProduct) {
+        //theProduct.setCreatedBy(authentication.getName());
+        theProduct.setCreatedDateTime(new Date());
+
+        System.out.println("save save save : " + theProduct.toString());
+        productRepository.save(theProduct);
+    }
+
+    @Override
+    public void update(Product theProduct) {
+        Product existingProduct = findById(theProduct.getId());
+        theProduct.setCreatedBy(existingProduct.getCreatedBy());
+        theProduct.setCreatedDateTime(existingProduct.getCreatedDateTime());
+        theProduct.setUpdatedDateTime(new Date());
+       // theProduct.setUpdatedBy(authentication.getName());
+
+        System.out.println("UPDATE UPDATE UPDATE : " + theProduct.toString());
         productRepository.save(theProduct);
     }
 }
