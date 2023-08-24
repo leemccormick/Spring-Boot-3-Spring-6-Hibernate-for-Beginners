@@ -5,7 +5,10 @@ import com.leemccormick.posdemo.service.ProductService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -76,6 +79,45 @@ public class MyStoreController {
         return "systems";
     }
 
+    @GetMapping("/showProductFormForAdd")
+    public String showProductFormForAdd(Model theModel) {
+
+        // create model attribute to bind form data
+        Product theProduct = new Product();
+        String title = "Add A New Product";
+        theModel.addAttribute("product", theProduct);
+        theModel.addAttribute("productFormTitle", title);
+        return "/product-form";
+    }
+
+    @GetMapping("/showProductFormForUpdate")
+    public String showProductFormForUpdate(@RequestParam("productId") int theId,
+                                           Model theModel) {
+
+        // get the product from the service
+        Product theProduct = productService.findById(theId);
+        String title = "Update Product Info";
+
+        // set product as a model attribute to pre-populate the form
+        theModel.addAttribute("product", theProduct);
+        theModel.addAttribute("productFormTitle", title);
+
+        // send over to our form
+        return "/product-form";
+    }
+
+    @PostMapping("/saveProduct")
+    public String saveProduct(@ModelAttribute("product") Product theProduct, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "/product-form"; // Return to the form with error messages
+        } else {
+            // save the product
+            productService.save(theProduct);
+            // use a redirect to prevent duplicate submissions
+            return "redirect:/";
+        }
+    }
+
     // Delete Product
     @GetMapping("/deleteProduct")
     public String delete(@RequestParam("productId") int theId) {
@@ -85,6 +127,5 @@ public class MyStoreController {
 
         // redirect to / --> Home Page
         return "redirect:/";
-
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -24,5 +25,26 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void deleteById(int theId) {
         productRepository.deleteById(theId);
+    }
+
+    @Override
+    public Product findById(int theId) {
+        Optional<Product> result = productRepository.findById(theId);
+
+        Product theProduct = null;
+
+        if (result.isPresent()) {
+            theProduct = result.get();
+        } else {
+            // we didn't find the product
+            throw new RuntimeException("Did not find product with id - " + theId);
+        }
+
+        return theProduct;
+    }
+
+    @Override
+    public void save(Product theProduct) {
+        productRepository.save(theProduct);
     }
 }

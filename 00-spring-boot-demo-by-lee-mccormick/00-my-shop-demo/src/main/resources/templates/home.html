@@ -52,7 +52,7 @@
 
 <!-- BODY -->
 <body>
-<h1>MY STORE DEMO </h1>
+<h1>MY STORE DEMO</h1>
 
 <!-- Navigation Section User Detail and Logout button -->
 <ul class="nav justify-content-end">
@@ -68,9 +68,9 @@
 <ul class="nav justify-content-end">
     <li class="nav-item">Roles : <span th:text="${roles}"></span></li>
 </ul>
+<hr>
 
 <!-- SALE and Admin Navigation Link Section -->
-<hr th:if="${hasSaleRole || hasAdminRole}">
 <div class="element-with-padding" th:if="${hasSaleRole}">
     <p>
         <a th:href="@{/sellers}">Sale Meeting</a>
@@ -89,8 +89,10 @@
 <!-- Add Product and Checkout Buttons Section -->
 <div class="element-with-padding">
     <div class="button-container">
-        <div th:if="${hasSaleRole || hasAdminRole}" class="button">
-            <a class="btn btn-primary mb-3">
+        <div th:if="${hasSaleRole || hasAdminRole}"
+             class="button">
+            <a class="btn btn-primary mb-3"
+               th:href="@{/showProductFormForAdd}">
                 Add Product
             </a>
         </div>
@@ -125,10 +127,12 @@
             <!-- Action Buttons For Product -->
             <td>
                 <a th:if="${hasCustomerRole}" class="btn btn-success btn-sm">
-                    Add To Card
+                    Add To Cart
                 </a>
 
-                <a th:if="${hasSaleRole || hasAdminRole}" class="btn btn-info btn-sm">
+                <a th:if="${hasSaleRole || hasAdminRole}"
+                   th:href="@{/showProductFormForUpdate(productId=${tempProduct.id})}"
+                   class="btn btn-info btn-sm">
                     Update
                 </a>
 
