@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS : Bootstrap is a popular open-source front-end framework that provides a collection of pre-built CSS (Cascading Style Sheets) and JavaScript components to help developers create responsive and visually appealing web applications and websites. It was originally developed by Twitter and is now maintained by the Bootstrap community. -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+    <title>MY STORE : Home Page</title>
+
+    <!-- Style CSS for the page -->
+    <style>
+        h1 {
+        background-color: black;
+        color: white;
+        font-size: 36px;
+        text-align: center;
+        padding: 20px;
+        }
+        .nav {
+        display: flex;
+        justify-content: flex-end;
+        background-color: #383838;
+        padding: 10x;
+        }
+        .nav-item {
+        color: white;
+        padding: 5px 10px;
+        margin: 0 5px;
+        border-radius: 5px;
+        }
+        .element-with-padding {
+        padding-left: 20px;
+        padding-right: 20px;
+        }
+       .button-container {
+       text-align: left;
+       }
+       .button {
+       display: inline-block;
+       padding-right: 20px;
+       border: none;
+       cursor: pointer;
+       border-radius: 5px;
+       }
+    </style>
+</head>
+
+<!-- BODY -->
+<body>
+<h1>MY STORE DEMO</h1>
+
+<!-- Navigation Section User Detail and Logout button -->
+<ul class="nav justify-content-end">
+    <li class="nav-item">Welcome ! <span th:text="${username}"></span></li>
+
+    <li class="nav-item">
+        <form action="" th:action="@{/logout}" method="POST" class="form-horizontal">
+            <input type="submit" value="Logout"/>
+        </form>
+    </li>
+</ul>
+
+<ul class="nav justify-content-end">
+    <li class="nav-item">Roles : <span th:text="${roles}"></span></li>
+</ul>
+<hr>
+
+<!-- SALE and Admin Navigation Link Section -->
+<div class="element-with-padding" th:if="${hasSaleRole}">
+    <p>
+        <a th:href="@{/sellers}">Sale Meeting</a>
+        (Only for Sale Peeps)
+    </p>
+</div>
+
+<div class="element-with-padding" th:if="${hasAdminRole}">
+    <p>
+        <a th:href="@{/systems}">IT Systems Meeting</a>
+        (Only for Admin Peeps)
+    </p>
+</div>
+<hr th:if="${hasSaleRole || hasAdminRole}">
+
+<!-- Add Product and Checkout Buttons Section -->
+<div class="element-with-padding">
+    <div class="button-container">
+        <div th:if="${hasSaleRole || hasAdminRole}"
+             class="button">
+            <a class="btn btn-primary mb-3"
+               th:href="@{/showProductFormForAdd}">
+                Add Product
+            </a>
+        </div>
+
+        <div th:if="${hasCustomerRole}" class="button">
+            <a class="btn btn-success mb-3">
+                Check out
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Product List Section -->
+<div class="element-with-padding">
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+        <tr>
+            <th>Product Name</th>
+            <th>Description</th>
+            <th>Price Per Unit</th>
+            <th th:if="${hasSaleRole || hasAdminRole}">Quality</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="tempProduct : ${products}">
+            <!-- Detail Section For Product -->
+            <td th:text="${tempProduct.name}"></td>
+            <td th:text="${tempProduct.description}"></td>
+            <td th:text="${tempProduct.price}"></td>
+            <td th:if="${hasSaleRole || hasAdminRole}" th:text="${tempProduct.quality}"></td>
+
+            <!-- Action Buttons For Product -->
+            <td>
+                <a th:if="${hasCustomerRole}" class="btn btn-success btn-sm">
+                    Add To Cart
+                </a>
+
+                <a th:if="${hasSaleRole || hasAdminRole}"
+                   th:href="@{/showProductFormForUpdate(productId=${tempProduct.id})}"
+                   class="btn btn-info btn-sm">
+                    Update
+                </a>
+
+                <a th:if="${hasAdminRole}"
+                   th:href="@{/deleteProduct(productId=${tempProduct.id})}"
+                   class="btn btn-danger btn-sm"
+                   onclick="if (!(confirm('Are you sure you want to delete this product?'))) return false">
+                    Delete
+                </a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
