@@ -50,13 +50,13 @@
                th:field="*{price}" required>
         <span th:if="${#fields.hasErrors('price')}" th:errors="*{price}"></span>
 
-        <label style="padding-bottom: 10px;" for="quality">Quality :</label>
+        <label style="padding-bottom: 10px;" for="quantity">Quantity :</label>
         <input class="form-control mb-4 w-25"
-               placeholder="$00.00"
-               type="text" id="quality"
-               name="quality"
-               th:field="*{quality}" required>
-        <span th:if="${#fields.hasErrors('quality')}" th:errors="*{quality}"></span>
+               placeholder="0"
+               type="text" id="quantity"
+               name="quantity"
+               th:field="*{quantity}" required>
+        <span th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></span>
 
         <button type="submit" class="btn btn-info col-2">Save</button>
     </form>

@@ -8,11 +8,11 @@ import java.util.Date;
 
 
 @Entity
-@Table(name = "product")
+@Table(name = "products")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "product_id")
     private int id;
 
     @Column(name = "product_name")
@@ -36,8 +36,8 @@ public class Product {
     @Column(name = "updated_by")
     private String updatedBy;
 
-    @Column(name = "quality")
-    private int quality;
+    @Column(name = "quantity")
+    private int quantity;
 
     public Product() {
 
@@ -113,12 +113,12 @@ public class Product {
         this.updatedBy = updatedBy;
     }
 
-    public int getQuality() {
-        return quality;
+    public int getQuantity() {
+        return quantity;
     }
 
-    public void setQuality(int quality) {
-        this.quality = quality;
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
     @Override
@@ -132,7 +132,7 @@ public class Product {
                 ", updatedDateTime=" + updatedDateTime +
                 ", createdBy='" + createdBy + '\'' +
                 ", updatedBy='" + updatedBy + '\'' +
-                ", quality=" + quality +
+                ", quality=" + quantity +
                 '}';
     }
 }

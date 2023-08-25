@@ -46,10 +46,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void save(Product theProduct) {
-        //theProduct.setCreatedBy(authentication.getName());
         theProduct.setCreatedDateTime(new Date());
-
-        System.out.println("save save save : " + theProduct.toString());
         productRepository.save(theProduct);
     }
 
@@ -59,9 +56,6 @@ public class ProductServiceImpl implements ProductService {
         theProduct.setCreatedBy(existingProduct.getCreatedBy());
         theProduct.setCreatedDateTime(existingProduct.getCreatedDateTime());
         theProduct.setUpdatedDateTime(new Date());
-       // theProduct.setUpdatedBy(authentication.getName());
-
-        System.out.println("UPDATE UPDATE UPDATE : " + theProduct.toString());
         productRepository.save(theProduct);
     }
 }
