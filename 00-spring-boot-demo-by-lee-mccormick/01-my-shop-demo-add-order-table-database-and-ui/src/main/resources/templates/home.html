@@ -10,9 +10,12 @@
     <!-- Bootstrap CSS : Bootstrap is a popular open-source front-end framework that provides a collection of pre-built CSS (Cascading Style Sheets) and JavaScript components to help developers create responsive and visually appealing web applications and websites. It was originally developed by Twitter and is now maintained by the Bootstrap community. -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
-    <title>MY STORE : Home Page</title>
+    <!-- For Icon -->
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-    <!-- Style CSS for the page -->
+   <title>MY STORE : Home Page</title>
+
+   <!-- Style CSS for the page -->
     <style>
         h1 {
         background-color: black;
@@ -97,11 +100,22 @@
             </a>
         </div>
 
-        <div th:if="${hasCustomerRole}" class="button">
-            <a class="btn btn-success mb-3">
+        <div th:if="${shouldShowCheckoutButton}" class="button">
+            <a class="btn btn-success mb-3"
+               th:href="@{/checkOut}">
                 Check out
             </a>
+
+<!--            <i class="fas fa-shopping-cart"></i>-->
+
         </div>
+
+        <div th:if="${hasCustomerRole}" class="button">
+<!--            <a class="fas fa-shopping-cart"></a>-->
+            <i class="fas fa-shopping-cart"> <span th:text="${cartDescription}"> </span> </i>
+
+        </div>
+
     </div>
 </div>
 
@@ -128,7 +142,8 @@
 
             <!-- Action Buttons For Product -->
             <td>
-                <a th:if="${hasCustomerRole}" class="btn btn-success btn-sm">
+                <a th:if="${hasCustomerRole}"
+                   class="btn btn-success btn-sm">
                     Add To Cart
                 </a>
 
