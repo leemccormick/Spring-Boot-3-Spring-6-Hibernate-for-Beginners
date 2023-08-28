@@ -2,6 +2,9 @@ package com.leemccormick.posdemo.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "order_items")
 public class OrderItem {
@@ -13,7 +16,7 @@ public class OrderItem {
     @Column(name = "order_id")
     private int orderId;
 
-    @Column(name = "product_id")
+    @Column(insertable = false, updatable = false, name = "product_id")
     private int productId;
 
     @Column(name = "quantity")
@@ -21,6 +24,10 @@ public class OrderItem {
 
     @Column(name = "subtotal")
     private double subtotal;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL) // Assuming LAZY fetching is desired
+    @JoinColumn(name = "product_id")
+    private Product product;
 
     public OrderItem() {
 
@@ -73,6 +80,14 @@ public class OrderItem {
         this.subtotal = subtotal;
     }
 
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
+    }
+
     @Override
     public String toString() {
         return "OrderItem{" +
@@ -81,6 +96,7 @@ public class OrderItem {
                 ", productId=" + productId +
                 ", quantity=" + quantity +
                 ", subtotal=" + subtotal +
+                ", product=" + product +
                 '}';
     }
 }

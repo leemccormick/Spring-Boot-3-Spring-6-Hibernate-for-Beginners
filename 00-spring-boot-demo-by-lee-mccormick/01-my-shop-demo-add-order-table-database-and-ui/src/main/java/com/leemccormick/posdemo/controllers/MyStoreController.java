@@ -109,7 +109,7 @@ public class MyStoreController {
 
         model.addAttribute("cartDescription", cartDescription);
         model.addAttribute("shouldShowCheckoutButton", shouldShowCheckoutButton);
-        
+
         log.info(String.format("HOME PAGE : Current Order is  : %s --> ", currentOrder));
         return "home";
     }
@@ -196,9 +196,10 @@ public class MyStoreController {
     }
 
     @GetMapping("/checkOut")
-    public String checkOut(Authentication authentication, Model theModel) {
-        // TODO: Work on checkOut function
-        return "redirect:/";
+    public String checkOut(Model theModel) {
+        theModel.addAttribute("order", currentOrder);
+        log.info(String.format("REVIEW ORDER PAGE TO UPDATE : Order is : %s --> ", currentOrder));
+        return "/review-order";
     }
 
     @GetMapping("/addToCart")
