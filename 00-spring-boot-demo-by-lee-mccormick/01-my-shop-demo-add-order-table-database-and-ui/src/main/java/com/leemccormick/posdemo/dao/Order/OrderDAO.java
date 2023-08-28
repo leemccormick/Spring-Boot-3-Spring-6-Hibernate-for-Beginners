@@ -8,11 +8,19 @@ import java.util.List;
 public interface OrderDAO {
     // CREATE
     void saveNewOrder(Order theOrder);
+
     void saveItemToOrder(int theOrderId, OrderItem theOrderItem);
+
     // READ
     List<Order> findOrdersForTheCustomer(String theCustomerId);
+
     List<Order> findOrdersForTheCustomerByOrderStatus(String theCustomerId, String theStatus);
+
     // UPDATE
+    void updateOrder(Order theOrder);
+
+    void updateOrderItem(OrderItem theOrderItem);
 
     // DELETE
+    void deleteOrderItem(OrderItem theOrderOrderItem);
 }

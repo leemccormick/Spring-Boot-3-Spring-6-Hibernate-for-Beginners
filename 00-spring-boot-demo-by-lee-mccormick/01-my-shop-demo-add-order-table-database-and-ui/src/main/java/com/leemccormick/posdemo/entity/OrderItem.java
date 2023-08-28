@@ -22,11 +22,6 @@ public class OrderItem {
     @Column(name = "subtotal")
     private double subtotal;
 
-
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "order_id")
-//    private Order order;
-
     public OrderItem() {
 
     }
@@ -77,14 +72,6 @@ public class OrderItem {
     public void setSubtotal(double subtotal) {
         this.subtotal = subtotal;
     }
-
-//    public Order getOrder() {
-//        return order;
-//    }
-//
-//    public void setOrder(Order order) {
-//        this.order = order;
-//    }
 
     @Override
     public String toString() {

@@ -49,7 +49,6 @@ public class MyStoreController {
         List<Product> listOfProducts = productService.findAllProduct();
         String currentUserId = authentication.getName();
         String authenticationRoles = authentication.getAuthorities().toString();
-      //  String userId = authenticationUsername.substring(0, 1).toUpperCase() + authenticationUsername.substring(1);
         String username = userService.findUserFullName(currentUserId);
         boolean hasCustomerRole = authenticationRoles.toLowerCase().contains("Customer".toLowerCase());
         boolean hasSaleRole = authenticationRoles.toLowerCase().contains("Sale".toLowerCase());
@@ -84,7 +83,7 @@ public class MyStoreController {
         model.addAttribute("hasSaleRole", hasSaleRole);
         model.addAttribute("hasCustomerRole", hasCustomerRole);
         listOfProduct = listOfProducts;
-        log.info(String.format("List Of Product : %s --> %s", listOfProducts.size(), listOfProducts));
+        log.info(String.format("HOME PAGE : List Of Product : %s --> %s", listOfProducts.size(), listOfProducts));
 
 
         int itemsInCurrentOrder = 0;
@@ -94,8 +93,8 @@ public class MyStoreController {
         // TO GET ORDER OR CREATE NEW ONE
         if (hasCustomerRole) {
             currentOrder = orderService.findPendingOrderForTheCustomer(currentUserId);
-            if (currentOrder != null) {
-                log.info(String.format("My Order is  : %s --> %s", currentOrder, currentOrder.getItems()));
+            if (currentOrder != null && !currentOrder.getItems().isEmpty()) {
+                log.info(String.format("HOME PAGE : My Order is  : %s --> %s", currentOrder, currentOrder.getItems()));
 
                 for (OrderItem item : currentOrder.getItems()) {
                     itemsInCurrentOrder += item.getQuantity();
@@ -105,13 +104,13 @@ public class MyStoreController {
                     cartDescription = "You have " + itemsInCurrentOrder + " items in the cart.";
                     shouldShowCheckoutButton = true;
                 }
-            //    itemsInCurrentOrder = currentOrder.getItems().size();
             }
         }
 
         model.addAttribute("cartDescription", cartDescription);
         model.addAttribute("shouldShowCheckoutButton", shouldShowCheckoutButton);
-       // boolean shouldShowCheckOutButton =
+        
+        log.info(String.format("HOME PAGE : Current Order is  : %s --> ", currentOrder));
         return "home";
     }
 
@@ -136,6 +135,8 @@ public class MyStoreController {
 
         theModel.addAttribute("product", theProduct);
         theModel.addAttribute("productFormTitle", title);
+
+        log.info(String.format("PRODUCT-FORM PAGE TO ADD : Product and Title are  : %s --> %s", theProduct, title));
         return "/product-form";
     }
 
@@ -152,25 +153,29 @@ public class MyStoreController {
         theModel.addAttribute("productFormTitle", title);
 
         // send over to our form
+        log.info(String.format("PRODUCT-FORM PAGE TO UPDATE : Product and Title are  : %s --> %s", theProduct, title));
         return "/product-form";
     }
 
     @PostMapping("/saveProduct")
     public String saveProduct(@ModelAttribute("product") Product theProduct, BindingResult bindingResult, Authentication authentication) {
         if (bindingResult.hasErrors()) {
+            log.error("PRODUCT-FORM PAGE ERROR --> Something wrong while saving the produce!");
             return "/product-form"; // Return to the form with error messages
         } else {
             switch (saveMode) {
                 case ADD:
                     theProduct.setCreatedBy(authentication.getName());
                     productService.save(theProduct);
+                    log.info(String.format("PRODUCT-FORM PAGE TO HOME : AFTER SUCCESSFULLY SAVE PRODUCT : Product is : %s ", theProduct));
                     break;
                 case UPDATE:
                     theProduct.setUpdatedBy(authentication.getName());
                     productService.update(theProduct);
+                    log.info(String.format("PRODUCT-FORM PAGE TO HOME : AFTER SUCCESSFULLY UPDATE PRODUCT : Product is : %s ", theProduct));
                     break;
                 default:
-                    log.error("Something wrong while saving the produce!");
+                    log.error("PRODUCT-FORM PAGE ERROR --> Something wrong while saving the produce!");
                     break;
             }
 
@@ -186,132 +191,55 @@ public class MyStoreController {
         productService.deleteById(theId);
 
         // redirect to / --> Home Page
+        log.info(String.format("HOME PAGE : AFTER SUCCESSFULLY DELETE PRODUCT : Product ID to delete is : %s ", theId));
         return "redirect:/";
     }
 
-//    /*
-//        (1, 'Pending'),
-//    (2, 'Processing'),
-//    (3, 'Shipped'),
-//    (4, 'Delivered'),
-//    (5, 'Cancelled');
-//    */
     @GetMapping("/checkOut")
     public String checkOut(Authentication authentication, Model theModel) {
-        // create model attribute to bind form data
-//        Order theOrder = new Order();
-//        theOrder.setCustomerId(authentication.getName());
-//        theOrder.setTotalAmount(20.0);
-//        theOrder.setStatus("Pending");
-//        theOrder.setCreatedDateTime(new Date());
-//        theOrder.setUpdatedDateTime(new Date());
-//        theOrder.setCreatedBy(authentication.getName());
-//        theOrder.setUpdatedBy(authentication.getName());
-
-
-        Product theProductForTempOrderItem1 = listOfProduct.get(0);
-        Product theProductForTempOrderItem2 = listOfProduct.get(2);
-        Product theProductForTempOrderItem3 = listOfProduct.get(3);
-
-      //  addItemToOrder(theOrder, theProductForTempOrderItem1, 2);
-//        addItemToOrder(theOrder, theProductForTempOrderItem2, 1);
-//        addItemToOrder(theOrder, theProductForTempOrderItem3, 3);
-
-
-     //   orderService.addNewOrder(theOrder);
-//        orderService.addNewOrderTest(theOrder);
-        addItemToOrderById(5,theProductForTempOrderItem1,2);
-        log.info(String.format("Finished adding item to  theProductForTempOrderItem1: %s --> ", theProductForTempOrderItem3));
-
-        addItemToOrderById(5,theProductForTempOrderItem2,1);
-        log.info(String.format("Finished adding item to  theProductForTempOrderItem2: %s --> ", theProductForTempOrderItem2));
-
-        addItemToOrderById(5,theProductForTempOrderItem3,3);
-        log.info(String.format("Finished adding item to  theProductForTempOrderItem3: %s --> ", theProductForTempOrderItem3));
-
-//        theModel.addAttribute("order", theOrder);
-//        log.info(String.format("New Order : %s --> ", theOrder));
-     //   log.info(String.format("Finished adding item to  theProductForTempOrderItem1: %s --> ", theProductForTempOrderItem3));
+        // TODO: Work on checkOut function
         return "redirect:/";
     }
 
-
     @GetMapping("/addToCart")
-    public String addItemToCard(@RequestParam("productId") int theProductId,
-                                Model theModel) {
-
+    public String addItemToCard(@RequestParam("productId") int theProductId, Authentication authentication) {
         Product theProduct = productService.findById(theProductId);
 
         if (currentOrder != null) {
             if (currentOrder.getItems().isEmpty()) {
-                // Add new items to currentOrder
-                OrderItem newItem = new OrderItem();
-                addItemToCurrentOrder(theProduct, 1);
-
+                currentOrder = orderService.addNewItemToTheOrder(currentOrder.getId(), theProduct, authentication.getName());
+                log.info(String.format("HOME PAGE : AFTER SUCCESSFULLY ADD TO CART : Current Order  is : %s --> ", currentOrder));
             } else {
                 boolean isTheNewItem = true;
+
+                OrderItem orderItemToUpdate = new OrderItem();
+
                 for (OrderItem item : currentOrder.getItems()) {
-                    if (item.getProductId() == theProductId) {
+                    if (item.getProductId() == theProduct.getId()) {
                         isTheNewItem = false;
-                        item.setQuantity(item.getQuantity() + 1);
-                        // Function to update orderItem;
+                        orderItemToUpdate = item;
                         break;
                     }
                 }
 
                 if (isTheNewItem) {
-                    // Add new items to currentOrder
-                    addItemToCurrentOrder(theProduct, 1);
+                    currentOrder = orderService.addNewItemToTheOrder(currentOrder.getId(), theProduct, authentication.getName());
+                    log.info(String.format("HOME PAGE : AFTER SUCCESSFULLY ADD TO CART : Current Order  is : %s --> ", currentOrder));
+                } else {
+                    int newQuantity = orderItemToUpdate.getQuantity() + 1;
+                    double newSubtotal = newQuantity * theProduct.getPrice();
+                    orderItemToUpdate.setQuantity(newQuantity);
+                    orderItemToUpdate.setSubtotal(newSubtotal);
+                    currentOrder = orderService.updateOrderWithItem(currentOrder, orderItemToUpdate, authentication.getName());
+                    log.info(String.format("HOME PAGE : AFTER SUCCESSFULLY ADD TO CART : Current Order  is : %s --> ", currentOrder));
                 }
             }
-        } else {
-            // Create new Order and add the first item.
+        } else { // Create new Order and add the first item, if current order is null
+            Order savedOrder = orderService.addNewOrder(new Order(), authentication.getName());
+            currentOrder = orderService.addNewItemToTheOrder(savedOrder.getId(), theProduct, authentication.getName());
+            log.info(String.format("HOME PAGE : AFTER SUCCESSFULLY ADD TO CART : Current Order  is : %s --> ", currentOrder));
         }
-      ///  String title = "Update Product Info";
 
         return "redirect:/";
-    }
-
-    private void addItemToCurrentOrder(Product product, int quantity) {
-        OrderItem tempOrderItem = new OrderItem();
-
-        tempOrderItem.setOrderId(currentOrder.getId());
-        tempOrderItem.setProductId(product.getId());
-        tempOrderItem.setQuantity(quantity);
-
-        double subtotalForItems = product.getPrice() * quantity;
-        tempOrderItem.setSubtotal(subtotalForItems);
-
-        //  theOrder.addItem(tempOrderItem);
-
-        orderService.addNewItemToTheOrder(currentOrder.getId(), tempOrderItem);
-    }
-    private void addItemToOrder(Order theOrder, Product product, int quantity) {
-        OrderItem tempOrderItem = new OrderItem();
-
-        tempOrderItem.setOrderId(theOrder.getId());
-        tempOrderItem.setProductId(product.getId());
-        tempOrderItem.setQuantity(quantity);
-
-        double subtotalForItems = product.getPrice() * quantity;
-        tempOrderItem.setSubtotal(subtotalForItems);
-
-        theOrder.addItem(tempOrderItem);
-    }
-
-
-    private void addItemToOrderById(int theOrderId, Product product, int quantity) {
-        OrderItem tempOrderItem = new OrderItem();
-
-        tempOrderItem.setOrderId(theOrderId);
-        tempOrderItem.setProductId(product.getId());
-        tempOrderItem.setQuantity(quantity);
-
-        double subtotalForItems = product.getPrice() * quantity;
-        tempOrderItem.setSubtotal(subtotalForItems);
-
-      //  theOrder.addItem(tempOrderItem);
-
-        orderService.addNewItemToTheOrder(theOrderId, tempOrderItem);
     }
 }
