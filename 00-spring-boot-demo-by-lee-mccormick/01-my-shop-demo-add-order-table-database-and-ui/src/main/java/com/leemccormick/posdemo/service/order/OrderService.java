@@ -3,7 +3,6 @@ package com.leemccormick.posdemo.service.order;
 import com.leemccormick.posdemo.entity.Order;
 import com.leemccormick.posdemo.entity.OrderItem;
 import com.leemccormick.posdemo.entity.Product;
-import com.leemccormick.posdemo.entity.User;
 
 import java.util.List;
 
@@ -19,7 +18,8 @@ public interface OrderService {
     List<Order> findAllOrders();
 
     Order findOrderById(int theId);
-    //  Order findPendingOrderForTheCustomer(String customerId);
+
+    OrderItem findOrderItemById(int theOrderItemId);
 
     Order findPendingOrderForTheCustomer(String customerId);
 
@@ -29,6 +29,10 @@ public interface OrderService {
     OrderItem updateOrderItem(OrderItem theOrderItem);
 
     Order updateOrderWithItem(Order theOrder, OrderItem theOrderItem, String userId);
+
+    Order addItemToOrderByIds(int theOrderId, int theOrderItemId);
+
+    Order subtractItemToOrderByIds(int theOrderId, int theOrderItemId);
 
     // DELETE
     void deleteOrder(Order theOrder);

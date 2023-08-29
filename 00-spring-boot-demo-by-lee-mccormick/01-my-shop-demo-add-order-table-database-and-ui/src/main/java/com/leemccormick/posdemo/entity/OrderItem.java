@@ -25,7 +25,7 @@ public class OrderItem {
     @Column(name = "subtotal")
     private double subtotal;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL) // Assuming LAZY fetching is desired
+    @ManyToOne(fetch = FetchType.LAZY) // Assuming LAZY fetching is desired
     @JoinColumn(name = "product_id")
     private Product product;
 

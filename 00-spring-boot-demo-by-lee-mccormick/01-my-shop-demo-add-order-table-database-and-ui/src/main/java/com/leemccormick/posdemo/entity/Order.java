@@ -24,9 +24,11 @@ public class Order {
     @Column(name = "order_status")
     private String status;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date_time")
     private Date createdDateTime;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_date_time")
     private Date updatedDateTime;
 

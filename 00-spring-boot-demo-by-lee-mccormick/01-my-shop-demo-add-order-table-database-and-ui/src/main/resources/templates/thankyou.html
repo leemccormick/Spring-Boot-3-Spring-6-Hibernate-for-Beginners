@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>MY STORE - Thank you Page</title>
+</head>
+
+<body>
+
+<h2> Thank you for ordering at my store, we will process your order soon.</h2>
+<hr>
+
+<h3> Order Number : <span th:text="${processingOrder.id}"></span> | Total : $<span
+        th:text="${processingOrder.totalAmount}"></span></h3>
+<hr>
+
+<a th:href="@{/}">Back to Home Page</a>
+
+</body>
+</html>

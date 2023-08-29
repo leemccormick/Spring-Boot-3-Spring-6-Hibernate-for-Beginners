@@ -1,5 +1,6 @@
 package com.leemccormick.posdemo.service.order;
 
+import com.leemccormick.posdemo.dao.Order.OrderItemRepository;
 import com.leemccormick.posdemo.dao.Order.OrderRepository;
 import com.leemccormick.posdemo.dao.Order.OrderDAO;
 import com.leemccormick.posdemo.entity.Order;
@@ -8,6 +9,7 @@ import com.leemccormick.posdemo.entity.OrderStatus;
 import com.leemccormick.posdemo.entity.Product;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -18,14 +20,16 @@ import java.util.Optional;
 @Slf4j
 public class OrderServiceImpl implements OrderService {
     private OrderRepository orderRepository;
+    private OrderItemRepository orderItemRepository;
     private OrderDAO orderDAO;
 
     @Autowired
     public OrderServiceImpl(OrderRepository theOrderRepository,
+                            OrderItemRepository theOrderItemRepository,
                             OrderDAO theOrderDAO) {
         orderRepository = theOrderRepository;
+        orderItemRepository = theOrderItemRepository;
         orderDAO = theOrderDAO;
-
     }
 
     // CREATE
@@ -52,7 +56,7 @@ public class OrderServiceImpl implements OrderService {
     public Order addNewItemToTheOrder(int theOrderId, Product theProduce, String userId) {
         OrderItem newOrderItem = new OrderItem();
         newOrderItem.setOrderId(theOrderId);
-        newOrderItem.setProductId(theProduce.getId());
+        newOrderItem.setProduct(theProduce);
         newOrderItem.setQuantity(1);
         double subtotalForItems = theProduce.getPrice() * 1;
         newOrderItem.setSubtotal(subtotalForItems);
@@ -79,6 +83,21 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("Did not find order with id - " + theId);
         }
         return theOrder;
+    }
+
+    @Override
+    public OrderItem findOrderItemById(int theOrderItemId) {
+        Optional<OrderItem> result = orderItemRepository.findById(theOrderItemId);
+
+        OrderItem theOrderItem = null;
+
+        if (result.isPresent()) {
+            theOrderItem = result.get();
+        } else {
+            throw new RuntimeException("Did not find order item with id - " + theOrderItemId);
+        }
+
+        return theOrderItem;
     }
 
     @Override
@@ -127,6 +146,33 @@ public class OrderServiceImpl implements OrderService {
         return updateTotalPrice(theOrder.getId(), userId);
     }
 
+    @Override
+    public Order addItemToOrderByIds(int theOrderId, int theOrderItemId) {
+        OrderItem existingOrderItem = findOrderItemById(theOrderItemId);
+        int newQuantity = existingOrderItem.getQuantity() + 1;
+        double newSubtotal = newQuantity * existingOrderItem.getProduct().getPrice();
+        existingOrderItem.setQuantity(newQuantity);
+        existingOrderItem.setSubtotal(newSubtotal);
+        Order existingOrder = findOrderById(theOrderId);
+        return updateOrderWithItem(existingOrder, existingOrderItem, existingOrder.getCustomerId());
+    }
+
+    @Override
+    public Order subtractItemToOrderByIds(int theOrderId, int theOrderItemId) {
+        OrderItem existingOrderItem = findOrderItemById(theOrderItemId);
+
+        if (existingOrderItem.getQuantity() > 0) {
+            int newQuantity = existingOrderItem.getQuantity() - 1;
+            double newSubtotal = newQuantity * existingOrderItem.getProduct().getPrice();
+            existingOrderItem.setQuantity(newQuantity);
+            existingOrderItem.setSubtotal(newSubtotal);
+            updateQuantityAndCheckForDeletion(existingOrderItem, newQuantity);
+        }
+
+        Order existingOrder = findOrderById(theOrderId);
+        return updateOrderWithItem(existingOrder, existingOrderItem, existingOrder.getCustomerId());
+    }
+
     private Order updateTotalPrice(int theOrderId, String userId) {
         Order currentOrder = findOrderById(theOrderId);
 
@@ -147,6 +193,15 @@ public class OrderServiceImpl implements OrderService {
         return currentOrder;
     }
 
+    private void updateQuantityAndCheckForDeletion(OrderItem orderItem, int newQuantity) {
+        orderItem.setQuantity(newQuantity);
+        if (newQuantity <= 0) {
+            deleteOrderItem(orderItem);
+        } else {
+            orderItemRepository.save(orderItem);
+        }
+    }
+
     // DELETE
     @Override
     public void deleteOrder(Order theOrder) {
@@ -155,6 +210,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public void deleteOrderItem(OrderItem theOrderOrderItem) {
-        orderDAO.deleteOrderItem(theOrderOrderItem);
+        try {
+            orderDAO.deleteOrderItem(theOrderOrderItem);
+        } catch (Exception exception) {
+            log.error(String.format("OrderService : Exception deleteOrderItem is : %s -->  ", exception));
+        }
     }
 }

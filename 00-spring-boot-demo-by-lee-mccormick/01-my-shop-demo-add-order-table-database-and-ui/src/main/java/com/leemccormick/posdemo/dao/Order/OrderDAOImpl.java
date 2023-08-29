@@ -74,13 +74,13 @@ public class OrderDAOImpl implements OrderDAO {
         entityManager.merge(theOrder);
     }
 
-    // DELETE
     @Override
     @Transactional
     public void updateOrderItem(OrderItem theOrderItem) {
         entityManager.merge(theOrderItem);
     }
 
+    // DELETE
     @Override
     @Transactional
     public void deleteOrderItem(OrderItem theOrderOrderItem) {

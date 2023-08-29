@@ -46,72 +46,77 @@ public class MyStoreController {
 
     @GetMapping("/")
     public String showHome(Authentication authentication, Model model) {
-        List<Product> listOfProducts = productService.findAllProduct();
-        String currentUserId = authentication.getName();
-        String authenticationRoles = authentication.getAuthorities().toString();
-        String username = userService.findUserFullName(currentUserId);
-        boolean hasCustomerRole = authenticationRoles.toLowerCase().contains("Customer".toLowerCase());
-        boolean hasSaleRole = authenticationRoles.toLowerCase().contains("Sale".toLowerCase());
-        boolean hasAdminRole = authenticationRoles.toLowerCase().contains("Admin".toLowerCase());
+        try {
+            List<Product> listOfProducts = productService.findAllProduct();
+            String currentUserId = authentication.getName();
+            String authenticationRoles = authentication.getAuthorities().toString();
+            String username = userService.findUserFullName(currentUserId);
+            boolean hasCustomerRole = authenticationRoles.toLowerCase().contains("Customer".toLowerCase());
+            boolean hasSaleRole = authenticationRoles.toLowerCase().contains("Sale".toLowerCase());
+            boolean hasAdminRole = authenticationRoles.toLowerCase().contains("Admin".toLowerCase());
 
-        String roles = "";
-        if (hasCustomerRole) {
-            roles += "Customer";
-        }
-
-        if (hasSaleRole) {
-            if (roles.isEmpty()) {
-                roles = "Sale";
-            } else {
-                roles += ", Sale";
+            String roles = "";
+            if (hasCustomerRole) {
+                roles += "Customer";
             }
 
-        }
-
-        if (hasAdminRole) {
-            if (roles.isEmpty()) {
-                roles = "Admin";
-            } else {
-                roles += ", Admin";
-            }
-        }
-
-        model.addAttribute("products", listOfProducts);
-        model.addAttribute("username", username);
-        model.addAttribute("roles", roles);
-        model.addAttribute("hasAdminRole", hasAdminRole);
-        model.addAttribute("hasSaleRole", hasSaleRole);
-        model.addAttribute("hasCustomerRole", hasCustomerRole);
-        listOfProduct = listOfProducts;
-        log.info(String.format("HOME PAGE : List Of Product : %s --> %s", listOfProducts.size(), listOfProducts));
-
-
-        int itemsInCurrentOrder = 0;
-        String cartDescription = "Your cart is empty, Let's start shopping :)";
-        boolean shouldShowCheckoutButton = false;
-
-        // TO GET ORDER OR CREATE NEW ONE
-        if (hasCustomerRole) {
-            currentOrder = orderService.findPendingOrderForTheCustomer(currentUserId);
-            if (currentOrder != null && !currentOrder.getItems().isEmpty()) {
-                log.info(String.format("HOME PAGE : My Order is  : %s --> %s", currentOrder, currentOrder.getItems()));
-
-                for (OrderItem item : currentOrder.getItems()) {
-                    itemsInCurrentOrder += item.getQuantity();
+            if (hasSaleRole) {
+                if (roles.isEmpty()) {
+                    roles = "Sale";
+                } else {
+                    roles += ", Sale";
                 }
 
-                if (itemsInCurrentOrder > 0) {
-                    cartDescription = "You have " + itemsInCurrentOrder + " items in the cart.";
-                    shouldShowCheckoutButton = true;
+            }
+
+            if (hasAdminRole) {
+                if (roles.isEmpty()) {
+                    roles = "Admin";
+                } else {
+                    roles += ", Admin";
                 }
             }
+
+            model.addAttribute("products", listOfProducts);
+            model.addAttribute("username", username);
+            model.addAttribute("roles", roles);
+            model.addAttribute("hasAdminRole", hasAdminRole);
+            model.addAttribute("hasSaleRole", hasSaleRole);
+            model.addAttribute("hasCustomerRole", hasCustomerRole);
+            listOfProduct = listOfProducts;
+            log.info(String.format("HOME PAGE : List Of Product : %s --> %s", listOfProducts.size(), listOfProducts));
+
+
+            int itemsInCurrentOrder = 0;
+            String cartDescription = "Your cart is empty, Let's start shopping :)";
+            boolean shouldShowCheckoutButton = false;
+
+            // TO GET ORDER OR CREATE NEW ONE
+            if (hasCustomerRole) {
+                currentOrder = orderService.findPendingOrderForTheCustomer(currentUserId);
+                if (currentOrder != null && !currentOrder.getItems().isEmpty()) {
+                    log.info(String.format("HOME PAGE : My Order is  : %s --> %s", currentOrder, currentOrder.getItems()));
+
+                    for (OrderItem item : currentOrder.getItems()) {
+                        itemsInCurrentOrder += item.getQuantity();
+                    }
+
+                    if (itemsInCurrentOrder > 0) {
+                        cartDescription = "You have " + itemsInCurrentOrder + " items in the cart.";
+                        shouldShowCheckoutButton = true;
+                    }
+                }
+            }
+
+            model.addAttribute("cartDescription", cartDescription);
+            model.addAttribute("shouldShowCheckoutButton", shouldShowCheckoutButton);
+
+            log.info(String.format("HOME PAGE : Current Order is  : %s --> ", currentOrder));
+            return "home";
+        } catch (Exception exception) {
+            log.error(String.format("HOME PAGE : Error Exception is  : %s --> ", exception));
+            throw exception;
         }
-
-        model.addAttribute("cartDescription", cartDescription);
-        model.addAttribute("shouldShowCheckoutButton", shouldShowCheckoutButton);
-
-        log.info(String.format("HOME PAGE : Current Order is  : %s --> ", currentOrder));
-        return "home";
     }
 
     // Add Request Mapping for /sellers to show sellers.html
@@ -197,8 +202,21 @@ public class MyStoreController {
 
     @GetMapping("/checkOut")
     public String checkOut(Model theModel) {
+        String customerName = userService.findUserFullName(currentOrder.getCustomerId());
+        currentOrder = orderService.findOrderById(currentOrder.getId());
+        String errorMessage = "";
+        boolean shouldShowError = false;
+        if (currentOrder.getTotalAmount() == 0) {
+            shouldShowError = true;
+            errorMessage = "Total amount must be grater than 0 to continue processing order. Please, try again.";
+        }
+
         theModel.addAttribute("order", currentOrder);
-        log.info(String.format("REVIEW ORDER PAGE TO UPDATE : Order is : %s --> ", currentOrder));
+        theModel.addAttribute("customerName", customerName);
+        theModel.addAttribute("shouldShowError", shouldShowError);
+        theModel.addAttribute("alertErrorMessage", errorMessage);
+
+        log.info(String.format("REVIEW ORDER PAGE TO UPDATE | Customer Name is Order is : %s : | --> Current Order is : %s  ", customerName, currentOrder));
         return "/review-order";
     }
 

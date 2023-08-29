@@ -39,6 +39,7 @@
         .element-with-padding {
         padding-left: 20px;
         padding-right: 20px;
+        padding-top: 20px;
         }
        .button-container {
        text-align: left;
@@ -58,7 +59,7 @@
 <h1>MY STORE DEMO</h1>
 
 <!-- Navigation Section User Detail and Logout button -->
-<ul class="nav justify-content-end">
+<ul class="nav justify-content-end" style="padding-top: 20px; padding-bottom: 0px;">
     <li class="nav-item">Welcome ! <span th:text="${username}"></span></li>
 
     <li class="nav-item">
@@ -68,8 +69,10 @@
     </li>
 </ul>
 
-<ul class="nav justify-content-end">
-    <li class="nav-item">Roles : <span th:text="${roles}"></span></li>
+<ul class="nav justify-content-end" style="padding-top: 10px; padding-bottom: 20px;">
+    <div class="element-with-padding">
+        <li class="nav-item">Roles : <span th:text="${roles}"></span></li>
+    </div>
 </ul>
 <hr>
 

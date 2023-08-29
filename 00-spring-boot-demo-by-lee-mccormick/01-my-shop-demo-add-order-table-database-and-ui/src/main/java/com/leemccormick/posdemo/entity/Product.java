@@ -24,9 +24,11 @@ public class Product {
     @Column(name = "price")
     private Double price;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_date_time")
     private Date createdDateTime;
 
+    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_date_time")
     private Date updatedDateTime;
 
