@@ -172,32 +172,33 @@
 
                 <!-- Order Status Actions Section -->
                 <td th:if="${hasSaleRole || hasAdminRole}">
-                    <a th:if="${hasAdminRole}">
+                    <a th:if="${hasAdminRole && item.status != 'Cancelled'}"
+                       th:href="@{/orders/cancelOrder(orderId=${item.id})}"
+                       onclick="if (!(confirm('Are you sure you want to cancel this order?'))) return false">
                         <i class="fas fa-times-circle text-danger"></i>
                     </a>
 
-                    <!-- TODO : See Order Detail Info -->
-                    <a th:if="${item.status == 'Pending'}">
+                    <a th:if="${item.status == 'Pending'}"
+                       th:href="@{/orders/orderDetails(orderId=${item.id})}">
                         <i class="fas fa-info-circle"></i>
                     </a>
 
-                    <!-- TODO : Update Status to Shipped -->
-                    <a th:if="${item.status == 'Processing'}">
+                    <a th:if="${item.status == 'Processing'}"
+                       th:href="@{/orders/updateOrderStatus(orderId=${item.id})}">
                         <i class="fas fa-truck"></i>
                     </a>
 
-                    <!--TODO : Update Status to Delivery -->
-                    <a th:if="${item.status == 'Shipped'}">
+                    <a th:if="${item.status == 'Shipped'}"
+                       th:href="@{/orders/updateOrderStatus(orderId=${item.id})}">
                         <i class="fas fa-check-circle"></i>
                     </a>
 
-                    <!-- TODO : See Order Detail Info -->
-                    <a th:if="${item.status == 'Delivered'}">
+                    <a th:if="${item.status == 'Delivered'}"
+                       th:href="@{/orders/orderDetails(orderId=${item.id})}">
                         <i class="fas fa-info-circle"></i>
                     </a>
 
-                    <!-- TODO : See Order Detail Info -->
-                    <a>
+                    <a th:href="@{/orders/orderDetails(orderId=${item.id})}">
                         <i th:if="${item.status == 'Cancelled'}" class="fas fa-info-circle"></i>
                     </a>
                 </td>
@@ -212,15 +213,16 @@
 
                 <!-- Action Buttons For Product -->
                 <td>
-                    <!-- TODO: Go to order detail and allow to update order status -->
                     <a th:if="${hasCustomerRole}"
+                       th:href="@{/orders/orderDetails(orderId=${item.id})}"
                        class="btn btn-success btn-sm">
                         See Order Details
                     </a>
 
                     <a th:if="${hasAdminRole}"
                        class="btn btn-danger btn-sm"
-                       onclick="if (!(confirm('Are you sure you want to delete this order?'))) return false">
+                       onclick="if (!(confirm('Are you sure you want to delete this order?'))) return false"
+                       th:href="@{/orders/deleteOrder(orderId=${item.id})}">
                         Delete
                     </a>
                 </td>
