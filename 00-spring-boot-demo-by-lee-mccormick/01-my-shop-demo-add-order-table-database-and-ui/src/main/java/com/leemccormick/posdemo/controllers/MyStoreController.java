@@ -197,7 +197,7 @@ public class MyStoreController {
         theModel.addAttribute("shouldShowError", shouldShowError);
         theModel.addAttribute("alertErrorMessage", errorMessage);
 
-        // Add more data when review order and update order 
+        // Add more data when review order and update order
         String currentUserId = authentication.getName();
         String authenticationRoles = authentication.getAuthorities().toString();
         boolean hasCustomerRole = userService.hasCustomerRole(authenticationRoles);

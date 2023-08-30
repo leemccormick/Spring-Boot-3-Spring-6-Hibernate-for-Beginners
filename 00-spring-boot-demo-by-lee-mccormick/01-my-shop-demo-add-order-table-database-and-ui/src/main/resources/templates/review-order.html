@@ -136,7 +136,8 @@
             style="padding-top: 20px; padding-bottom: 10px; padding-left: 20px; padding-right: 20px;">
 
             <li class="nav-item">
-                <a class="btn custom-black-bg mb-3">
+                <a class="btn custom-black-bg mb-3"
+                   th:href="@{/orders/refreshOrder(orderId=${order.id})}">
                     MANAGE ORDER STATUS <i class="fas fa-sync"></i>
                 </a>
             </li>
@@ -144,7 +145,8 @@
             <li class="nav-item">
                 <div th:if="${order.status != 'Processing'}">
                     <a class="btn btn-success mb-3"
-                       th:href="@{/}"> <i class="fas fa-cog white"></i>
+                       th:href="@{/orders/updateOrderStatusToProcessing(orderId=${order.id})}">
+                        <i class="fas fa-cog white"></i>
                         PROCESSING
                     </a>
                 </div>
@@ -153,7 +155,8 @@
             <li class="nav-item">
                 <div th:if="${order.status != 'Shipped'}">
                     <a class="btn btn-success mb-3"
-                       th:href="@{/}"> <i class="fas fa-truck white"></i>
+                       th:href="@{/orders/updateOrderStatusToShipped(orderId=${order.id})}">
+                        <i class="fas fa-truck white"></i>
                         SHIPPED
                     </a>
                 </div>
@@ -162,7 +165,8 @@
             <li class="nav-item">
                 <div th:if="${order.status != 'Delivered'}">
                     <a class="btn btn-success mb-3"
-                       th:href="@{/}"> <i class="fas fa-check-circle white"></i>
+                       th:href="@{/orders/updateOrderStatusToDelivered(orderId=${order.id})}">
+                        <i class="fas fa-check-circle white"></i>
                         DELIVERED
                     </a>
                 </div>
@@ -171,9 +175,9 @@
             <li class="nav-item">
                 <div th:if="${order.status != 'Cancelled' && hasAdminRole}">
                     <a class="btn btn-success mb-3"
-                       th:href="@{/}"
-                       onclick="if (!(confirm('Are you sure you want to cancel this order?'))) return false"> <i
-                            class="fas fa-times-circle text-danger white"></i>
+                       th:href="@{/orders/updateOrderStatusToCancel(orderId=${order.id})}"
+                       onclick="if (!(confirm('Are you sure you want to cancel this order?'))) return false">
+                        <i class="fas fa-times-circle text-danger white"></i>
                         CANCELLED
                     </a>
                 </div>

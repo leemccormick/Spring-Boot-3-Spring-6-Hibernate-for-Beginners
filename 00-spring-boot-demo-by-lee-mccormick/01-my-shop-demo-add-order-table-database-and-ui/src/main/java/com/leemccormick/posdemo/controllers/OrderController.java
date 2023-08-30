@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,6 +92,113 @@ public class OrderController {
             return "redirect:/orders";
         } catch (Exception exception) {
             log.error(String.format("ORDER LIST PAGE : UPDATE ORDER STATUS : Error Exception is  : %s --> ", exception));
+            throw exception;
+        }
+    }
+
+    @GetMapping("/orders/updateOrderStatusToProcessing")
+    public String updateOrderStatusToProcessing(@RequestParam("orderId") int theOrderId,
+                                                Authentication authentication,
+                                                RedirectAttributes redirectAttributes
+    ) {
+        try {
+            Order theOrder = orderService.findOrderById(theOrderId);
+            boolean hasAdminRole = userService.hasAdminRole(authentication.getAuthorities().toString());
+            boolean hasSaleRole = userService.hasSaleRole(authentication.getAuthorities().toString());
+
+            if (hasAdminRole || hasSaleRole) {
+                theOrder.setStatus(OrderStatus.PROCESSING.getValue());
+                Order updatedOder = orderService.updateOrder(theOrder, authentication.getName());
+                log.info(String.format("ORDER DETAIL PAGE | SUCCESS UPDATE ORDER STATUS | updateOrderStatusToProcessing | UpdatedOder Id is  : %s --> ", updatedOder));
+            }
+
+            redirectAttributes.addAttribute("orderId", theOrderId);
+            return "redirect:/orders/orderDetails";
+        } catch (Exception exception) {
+            log.error(String.format("ORDER DETAIL PAGE  : UPDATE ORDER STATUS : Error Exception is  : %s --> ", exception));
+            throw exception;
+        }
+    }
+
+    @GetMapping("/orders/updateOrderStatusToShipped")
+    public String updateOrderStatusToShipped(@RequestParam("orderId") int theOrderId,
+                                             Authentication authentication,
+                                             RedirectAttributes redirectAttributes
+    ) {
+        try {
+            Order theOrder = orderService.findOrderById(theOrderId);
+            boolean hasAdminRole = userService.hasAdminRole(authentication.getAuthorities().toString());
+            boolean hasSaleRole = userService.hasSaleRole(authentication.getAuthorities().toString());
+
+            if (hasAdminRole || hasSaleRole) {
+                theOrder.setStatus(OrderStatus.SHIPPED.getValue());
+                Order updatedOder = orderService.updateOrder(theOrder, authentication.getName());
+                log.info(String.format("ORDER DETAIL PAGE | SUCCESS UPDATE ORDER STATUS | updateOrderStatusToShipped | UpdatedOder Id is  : %s --> ", updatedOder));
+            }
+
+            redirectAttributes.addAttribute("orderId", theOrderId);
+            return "redirect:/orders/orderDetails";
+        } catch (Exception exception) {
+            log.error(String.format("ORDER DETAIL PAGE  : UPDATE ORDER STATUS : Error Exception is  : %s --> ", exception));
+            throw exception;
+        }
+    }
+
+    @GetMapping("/orders/updateOrderStatusToDelivered")
+    public String updateOrderStatusToDelivered(@RequestParam("orderId") int theOrderId,
+                                               Authentication authentication,
+                                               RedirectAttributes redirectAttributes
+    ) {
+        try {
+            Order theOrder = orderService.findOrderById(theOrderId);
+            boolean hasAdminRole = userService.hasAdminRole(authentication.getAuthorities().toString());
+            boolean hasSaleRole = userService.hasSaleRole(authentication.getAuthorities().toString());
+
+            if (hasAdminRole || hasSaleRole) {
+                theOrder.setStatus(OrderStatus.DELIVERED.getValue());
+                Order updatedOder = orderService.updateOrder(theOrder, authentication.getName());
+                log.info(String.format("ORDER DETAIL PAGE | SUCCESS UPDATE ORDER STATUS | updateOrderStatusToDelivered | UpdatedOder Id is  : %s --> ", updatedOder));
+            }
+
+            redirectAttributes.addAttribute("orderId", theOrderId);
+            return "redirect:/orders/orderDetails";
+        } catch (Exception exception) {
+            log.error(String.format("ORDER DETAIL PAGE  : UPDATE ORDER STATUS : Error Exception is  : %s --> ", exception));
+            throw exception;
+        }
+    }
+
+    @GetMapping("/orders/updateOrderStatusToCancel")
+    public String updateOrderStatusToCancel(@RequestParam("orderId") int theOrderId,
+                                            Authentication authentication,
+                                            RedirectAttributes redirectAttributes
+    ) {
+        try {
+            if (userService.hasAdminRole(authentication.getAuthorities().toString())) {
+                Order theOrder = orderService.findOrderById(theOrderId);
+                theOrder.setStatus(OrderStatus.CANCELLED.getValue());
+                Order updatedOder = orderService.updateOrder(theOrder, authentication.getName());
+                log.info(String.format("ORDER DETAIL PAGE | SUCCESS UPDATE ORDER STATUS | updateOrderStatusToCancel | UpdatedOder Id is  : %s --> ", updatedOder));
+            }
+
+            redirectAttributes.addAttribute("orderId", theOrderId);
+            return "redirect:/orders/orderDetails";
+        } catch (Exception exception) {
+            log.error(String.format("ORDER DETAIL PAGE  : UPDATE ORDER STATUS : Error Exception is  : %s --> ", exception));
+            throw exception;
+        }
+    }
+
+    @GetMapping("/orders/refreshOrder")
+    public String refreshOrder(@RequestParam("orderId") int theOrderId,
+                               RedirectAttributes redirectAttributes
+    ) {
+        try {
+            log.info(String.format("ORDER DETAIL PAGE | Refresh order with Id is  : %s --> ", theOrderId));
+            redirectAttributes.addAttribute("orderId", theOrderId);
+            return "redirect:/orders/orderDetails";
+        } catch (Exception exception) {
+            log.error(String.format("ORDER DETAIL PAGE  : UPDATE ORDER STATUS : Error Exception is  : %s --> ", exception));
             throw exception;
         }
     }
