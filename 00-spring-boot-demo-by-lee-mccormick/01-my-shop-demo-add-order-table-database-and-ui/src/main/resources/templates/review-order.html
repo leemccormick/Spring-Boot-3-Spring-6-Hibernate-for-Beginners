@@ -204,11 +204,11 @@
 
                     <a class="btn btn-info btn-sm"
                        th:href="@{/checkOut/addItem(orderId=${order.id},orderItemId=${item.id})}"
-                       th:if="${isMyOrder && isPendingOrder}">+</a>
+                       th:if="${isMyOrder && isPendingOrder && item.quantity != item.product.quantity}">+</a>
 
                     <a class="btn btn-info btn-sm"
                        th:href="@{/checkOut/subtractItem(orderId=${order.id},orderItemId=${item.id})}"
-                       th:if="${isMyOrder && isPendingOrder}">-</a>
+                       th:if="${isMyOrder && isPendingOrder && item.quantity != 0}">-</a>
                 </td>
 
                 <td th:text="${item.product.price}"></td>

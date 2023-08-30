@@ -3,15 +3,14 @@ package com.leemccormick.posdemo.service.order;
 import com.leemccormick.posdemo.dao.Order.OrderItemRepository;
 import com.leemccormick.posdemo.dao.Order.OrderRepository;
 import com.leemccormick.posdemo.dao.Order.OrderDAO;
-import com.leemccormick.posdemo.entity.Order;
-import com.leemccormick.posdemo.entity.OrderItem;
-import com.leemccormick.posdemo.entity.OrderStatus;
-import com.leemccormick.posdemo.entity.Product;
+import com.leemccormick.posdemo.dao.ProductRepository;
+import com.leemccormick.posdemo.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -22,14 +21,18 @@ public class OrderServiceImpl implements OrderService {
     private OrderRepository orderRepository;
     private OrderItemRepository orderItemRepository;
     private OrderDAO orderDAO;
+    private ProductRepository productRepository;
 
     @Autowired
     public OrderServiceImpl(OrderRepository theOrderRepository,
                             OrderItemRepository theOrderItemRepository,
-                            OrderDAO theOrderDAO) {
+                            OrderDAO theOrderDAO,
+                            ProductRepository theProductRepository
+    ) {
         orderRepository = theOrderRepository;
         orderItemRepository = theOrderItemRepository;
         orderDAO = theOrderDAO;
+        productRepository = theProductRepository;
     }
 
     // CREATE
@@ -55,13 +58,18 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order addNewItemToTheOrder(int theOrderId, Product theProduce, String userId) {
         OrderItem newOrderItem = new OrderItem();
-        newOrderItem.setOrderId(theOrderId);
-        newOrderItem.setProduct(theProduce);
-        newOrderItem.setQuantity(1);
-        double subtotalForItems = theProduce.getPrice() * 1;
-        newOrderItem.setSubtotal(subtotalForItems);
-        orderDAO.saveItemToOrder(theOrderId, newOrderItem);
-        return updateTotalPrice(theOrderId, userId);
+
+        if (theProduce.getQuantity() > 1) {
+            newOrderItem.setOrderId(theOrderId);
+            newOrderItem.setProduct(theProduce);
+            newOrderItem.setQuantity(1);
+            double subtotalForItems = theProduce.getPrice() * 1;
+            newOrderItem.setSubtotal(subtotalForItems);
+            orderDAO.saveItemToOrder(theOrderId, newOrderItem);
+            return updateTotalPrice(theOrderId, userId);
+        } else {
+            return findOrderById(theOrderId);
+        }
     }
 
     // READ
@@ -139,6 +147,31 @@ public class OrderServiceImpl implements OrderService {
         return nReturnTotalSales;
     }
 
+    @Override
+    public ErrorResponse validateOrderBeforeProcessing(Order theOrder) {
+        ErrorResponse newErrorResponse = new ErrorResponse();
+        boolean hasError = false;
+
+        if (theOrder.getTotalAmount() <= 0) {
+            hasError = true;
+            newErrorResponse.addErrorMessage("Total amount must be grater than 0 to continue processing order.");
+        }
+
+        for (OrderItem item : theOrder.getItems()) {
+            if (item.getQuantity() > 0) {
+                if (item.getProduct().getQuantity() < item.getQuantity()) {
+                    newErrorResponse.addErrorMessage("Out of stock. we only have " + item.getProduct().getQuantity() + " " + item.getProduct().getName() + " left, make sure you have correct quantity before processing.");
+                }
+            } else {
+                hasError = true;
+                newErrorResponse.addErrorMessage("Order item quantity can not be 0, please check " + item.getProduct().getName() + " , make sure you have correct quantity or delete this item before processing.");
+            }
+        }
+
+        newErrorResponse.setHasError(hasError);
+        return newErrorResponse;
+    }
+
     // UPDATE
     @Override
     public Order updateOrder(Order theOrder, String userId) {
@@ -163,17 +196,23 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order addItemToOrderByIds(int theOrderId, int theOrderItemId) {
         OrderItem existingOrderItem = findOrderItemById(theOrderItemId);
-        int newQuantity = existingOrderItem.getQuantity() + 1;
-        double newSubtotal = newQuantity * existingOrderItem.getProduct().getPrice();
-        existingOrderItem.setQuantity(newQuantity);
-        existingOrderItem.setSubtotal(newSubtotal);
         Order existingOrder = findOrderById(theOrderId);
-        return updateOrderWithItem(existingOrder, existingOrderItem, existingOrder.getCustomerId());
+        int newQuantity = existingOrderItem.getQuantity() + 1;
+
+        if (existingOrderItem.getProduct().getQuantity() >= newQuantity) {
+            double newSubtotal = newQuantity * existingOrderItem.getProduct().getPrice();
+            existingOrderItem.setQuantity(newQuantity);
+            existingOrderItem.setSubtotal(newSubtotal);
+            return updateOrderWithItem(existingOrder, existingOrderItem, existingOrder.getCustomerId());
+        } else {
+            return existingOrder;
+        }
     }
 
     @Override
     public Order subtractItemToOrderByIds(int theOrderId, int theOrderItemId) {
         OrderItem existingOrderItem = findOrderItemById(theOrderItemId);
+        Order existingOrder = findOrderById(theOrderId);
 
         if (existingOrderItem.getQuantity() > 0) {
             int newQuantity = existingOrderItem.getQuantity() - 1;
@@ -181,10 +220,25 @@ public class OrderServiceImpl implements OrderService {
             existingOrderItem.setQuantity(newQuantity);
             existingOrderItem.setSubtotal(newSubtotal);
             updateQuantityAndCheckForDeletion(existingOrderItem, newQuantity);
+            return updateOrderWithItem(existingOrder, existingOrderItem, existingOrder.getCustomerId());
+        } else {
+            return existingOrder;
+        }
+    }
+
+    @Override
+    public Order checkOut(Order theOrder) {
+        // Update Produce Quantity
+        for (OrderItem item : theOrder.getItems()) {
+            Product theProduct = item.getProduct();
+            int newProductQuantity = theProduct.getQuantity() - item.getQuantity();
+            theProduct.setQuantity(newProductQuantity);
+            productRepository.save(theProduct);
         }
 
-        Order existingOrder = findOrderById(theOrderId);
-        return updateOrderWithItem(existingOrder, existingOrderItem, existingOrder.getCustomerId());
+        // Update Order Status and return the updated order
+        theOrder.setStatus(OrderStatus.PROCESSING.getValue());
+        return updateOrder(theOrder, theOrder.getCustomerId());
     }
 
     private Order updateTotalPrice(int theOrderId, String userId) {

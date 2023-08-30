@@ -1,13 +1,9 @@
 package com.leemccormick.posdemo.controllers;
 
-import com.leemccormick.posdemo.entity.Order;
-import com.leemccormick.posdemo.entity.OrderItem;
-import com.leemccormick.posdemo.entity.OrderStatus;
-import com.leemccormick.posdemo.entity.Product;
+import com.leemccormick.posdemo.entity.*;
 import com.leemccormick.posdemo.service.order.OrderService;
 import com.leemccormick.posdemo.service.product.ProductService;
 import com.leemccormick.posdemo.service.user.UserService;
-import jakarta.persistence.Column;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -19,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -49,7 +44,6 @@ public class MyStoreController {
     @GetMapping("/")
     public String showHome(Authentication authentication, Model model) {
         try {
-            List<Product> listOfProducts = productService.findAllProduct();
             String currentUserId = authentication.getName();
             String authenticationRoles = authentication.getAuthorities().toString();
             String username = userService.findUserFullName(currentUserId);
@@ -57,16 +51,6 @@ public class MyStoreController {
             boolean hasSaleRole = userService.hasSaleRole(authenticationRoles);
             boolean hasAdminRole = userService.hasAdminRole(authenticationRoles);
             String roles = userService.findRoles(authenticationRoles);
-
-            model.addAttribute("products", listOfProducts);
-            model.addAttribute("username", username);
-            model.addAttribute("roles", roles);
-            model.addAttribute("hasAdminRole", hasAdminRole);
-            model.addAttribute("hasSaleRole", hasSaleRole);
-            model.addAttribute("hasCustomerRole", hasCustomerRole);
-            listOfProduct = listOfProducts;
-            log.info(String.format("HOME PAGE : List Of Product : %s --> %s", listOfProducts.size(), listOfProducts));
-
 
             int itemsInCurrentOrder = 0;
             String cartDescription = "Your cart is empty, Let's start shopping :)";
@@ -89,9 +73,23 @@ public class MyStoreController {
                 }
             }
 
+            // TO GET LIST OF PRODUCT
+            if (hasSaleRole || hasAdminRole) {
+                listOfProduct = productService.findAllProduct();
+            } else {
+                listOfProduct = productService.findProductsForCustomer();
+            }
+
+            model.addAttribute("products", listOfProduct);
+            model.addAttribute("username", username);
+            model.addAttribute("roles", roles);
+            model.addAttribute("hasAdminRole", hasAdminRole);
+            model.addAttribute("hasSaleRole", hasSaleRole);
+            model.addAttribute("hasCustomerRole", hasCustomerRole);
             model.addAttribute("cartDescription", cartDescription);
             model.addAttribute("shouldShowCheckoutButton", shouldShowCheckoutButton);
 
+            log.info(String.format("HOME PAGE : List Of Product : %s --> %s", listOfProduct.size(), listOfProduct));
             log.info(String.format("HOME PAGE : Current Order is  : %s --> ", currentOrder));
             return "home";
         } catch (Exception exception) {
@@ -185,17 +183,24 @@ public class MyStoreController {
     public String checkOut(Model theModel, Authentication authentication) {
         String customerName = userService.findUserFullName(currentOrder.getCustomerId());
         currentOrder = orderService.findOrderById(currentOrder.getId());
-        String errorMessage = "";
+        StringBuilder errorMessage = new StringBuilder();
         boolean shouldShowError = false;
-        if (currentOrder.getTotalAmount() == 0) {
+
+        ErrorResponse validationResponse = orderService.validateOrderBeforeProcessing(currentOrder);
+        if (validationResponse.getHasError()) {
             shouldShowError = true;
-            errorMessage = "Total amount must be grater than 0 to continue processing order. Please, try again.";
+            for (String message : validationResponse.getErrorMessages()) {
+                if (!message.isEmpty()) {
+                    errorMessage.append("\n");
+                    errorMessage.append(message);
+                }
+            }
         }
 
         theModel.addAttribute("order", currentOrder);
         theModel.addAttribute("customerName", customerName);
         theModel.addAttribute("shouldShowError", shouldShowError);
-        theModel.addAttribute("alertErrorMessage", errorMessage);
+        theModel.addAttribute("alertErrorMessage", errorMessage.toString());
 
         // Add more data when review order and update order
         String currentUserId = authentication.getName();
@@ -249,8 +254,13 @@ public class MyStoreController {
                     double newSubtotal = newQuantity * theProduct.getPrice();
                     orderItemToUpdate.setQuantity(newQuantity);
                     orderItemToUpdate.setSubtotal(newSubtotal);
-                    currentOrder = orderService.updateOrderWithItem(currentOrder, orderItemToUpdate, authentication.getName());
-                    log.info(String.format("HOME PAGE : AFTER SUCCESSFULLY ADD TO CART : Current Order  is : %s --> ", currentOrder));
+
+                    if (theProduct.getQuantity() >= newQuantity) {
+                        currentOrder = orderService.updateOrderWithItem(currentOrder, orderItemToUpdate, authentication.getName());
+                        log.info(String.format("HOME PAGE : AFTER SUCCESSFULLY ADD TO CART : Current Order  is : %s --> ", currentOrder));
+                    } else {
+                        log.info(String.format("HOME PAGE : AFTER SUCCESSFULLY ADD TO CART : Current Order  is : %s --> ", currentOrder));
+                    }
                 }
             }
         } else { // Create new Order and add the first item, if current order is null

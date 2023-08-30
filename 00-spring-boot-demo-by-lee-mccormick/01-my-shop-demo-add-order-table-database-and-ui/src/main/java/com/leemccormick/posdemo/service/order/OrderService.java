@@ -1,5 +1,6 @@
 package com.leemccormick.posdemo.service.order;
 
+import com.leemccormick.posdemo.entity.ErrorResponse;
 import com.leemccormick.posdemo.entity.Order;
 import com.leemccormick.posdemo.entity.OrderItem;
 import com.leemccormick.posdemo.entity.Product;
@@ -27,6 +28,8 @@ public interface OrderService {
 
     double findTotalSales(List<Order> theListOfOrder);
 
+    ErrorResponse validateOrderBeforeProcessing(Order theOrder);
+
     // UPDATE
     Order updateOrder(Order theOrder, String userId);
 
@@ -37,6 +40,8 @@ public interface OrderService {
     Order addItemToOrderByIds(int theOrderId, int theOrderItemId);
 
     Order subtractItemToOrderByIds(int theOrderId, int theOrderItemId);
+
+    Order checkOut(Order theOrder);
 
     // DELETE
     void deleteOrder(Order theOrder);

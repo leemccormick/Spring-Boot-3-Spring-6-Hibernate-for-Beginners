@@ -5,6 +5,7 @@ import com.leemccormick.posdemo.entity.Product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,22 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<Product> findAllProduct() {
         return productRepository.findAll();
+    }
+
+    @Override
+    public List<Product> findProductsForCustomer() {
+        List<Product> listOfProduct = findAllProduct();
+        List<Product> listOfProductToShowCustomer = new ArrayList<>();
+
+        if (!listOfProduct.isEmpty()) {
+            for (Product theProduct : listOfProduct) {
+                if (theProduct.getQuantity() > 0) {
+                    listOfProductToShowCustomer.add(theProduct);
+                }
+            }
+        }
+
+        return listOfProductToShowCustomer;
     }
 
     @Override
