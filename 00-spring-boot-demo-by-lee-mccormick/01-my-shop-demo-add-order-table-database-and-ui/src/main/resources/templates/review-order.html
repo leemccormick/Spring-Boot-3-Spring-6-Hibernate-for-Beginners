@@ -5,6 +5,8 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+          integrity="sha384-TwnJqaDEwY7wDd4cjgJ/6sF5oRTfl7E8Gttrj6j7e9kr6t8zlz6yOVtDmYcbPjqN" crossorigin="anonymous">
 
     <!-- Style CSS for the page -->
     <style>
@@ -13,6 +15,13 @@
       color: white;
       font-size: 36px;
       text-align: center;
+      padding: 20px;
+      }
+      h3 {
+      background-color: #f2f2f2;
+      color: black;
+      font-size: 20px;
+      text-align: left;
       padding: 20px;
       }
       .element-with-padding {
@@ -73,6 +82,13 @@
       margin: 0 5px;
       border-radius: 5px;
       }
+      .white {
+      color: white;
+      }
+      .custom-black-bg {
+      background-color: black;
+      color: white; /* Adding white text color for better contrast */
+      }
     </style>
 </head>
 <body>
@@ -80,18 +96,92 @@
     <h1>MY CART</h1>
 
     <ul class="nav justify-content-end" style="padding-top: 20px; padding-bottom: 10px;">
-        <div class="element-with-padding">
-            <li class="nav-item">Order Number : <span th:text="${order.id}"></span></li>
-        </div>
+        <li class="nav-item">Order Number : <span th:text="${order.id}"></span></li>
+        <li class="nav-item"> | Status :</li>
+        <li th:if="${order.status == 'Pending'}"><i class="fas fa-hourglass-start white"></i></li>
+        <li th:if="${order.status == 'Pending'}" class="nav-item"> PENDING</li>
+        <li th:if="${order.status == 'Pending'}" class="nav-item"></li>
+
+        <li th:if="${order.status == 'Processing'}"><i class="fas fa-cog white"></i></li>
+        <li th:if="${order.status == 'Processing'}" class="nav-item"> PROCESSING</li>
+        <li th:if="${order.status == 'Processing'}" class="nav-item"></li>
+
+        <li th:if="${order.status == 'Shipped'}"><i class="fas fa-truck white"></i></li>
+        <li th:if="${order.status == 'Shipped'}" class="nav-item"> SHIPPED</li>
+        <li th:if="${order.status == 'Shipped'}" class="nav-item"></li>
+
+        <li th:if="${order.status == 'Delivered'}"><i class="fas fa-check-circle white"></i></li>
+        <li th:if="${order.status == 'Delivered'}" class="nav-item"> DELIVERED</li>
+        <li th:if="${order.status == 'Delivered'}" class="nav-item"></li>
+
+        <li th:if="${order.status == 'Cancelled'}"><i class="fas fa-times-circle text-danger white"></i></li>
+        <li th:if="${order.status == 'Cancelled'}" class="nav-item"> CANCELLED</li>
+        <li th:if="${order.status == 'Cancelled'}" class="nav-item"></li>
     </ul>
 
-    <ul class="nav justify-content-end" style="padding-top: 10px; padding-bottom: 20px;">
+    <ul class="nav justify-content-end" style="padding-top: 10px; padding-bottom: 10px;">
         <div class="element-with-padding">
             <li class="nav-item">Customer Name : <span th:text="${customerName}"></span></li>
         </div>
     </ul>
 
+    <div th:if="${hasSaleRole || hasAdminRole}">
+        <ul class="nav justify-content-end" style="padding-top: 10px; padding-bottom: 10px;  padding-right: 20px;">
+            <li class="nav-item">User Name : <span th:text="${adminOrSaleUsername}"></span></li>
+            <li class="nav-item"> |</li>
+            <li class="nav-item">Roles : <span th:text="${userRoles}"></span></li>
+        </ul>
+
+        <ul th:if="${order.status != 'Pending'}" class="nav justify-content-end"
+            style="padding-top: 20px; padding-bottom: 10px; padding-left: 20px; padding-right: 20px;">
+
+            <li class="nav-item">
+                <a class="btn custom-black-bg mb-3">
+                    MANAGE ORDER STATUS <i class="fas fa-sync"></i>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <div th:if="${order.status != 'Processing'}">
+                    <a class="btn btn-success mb-3"
+                       th:href="@{/}"> <i class="fas fa-cog white"></i>
+                        PROCESSING
+                    </a>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <div th:if="${order.status != 'Shipped'}">
+                    <a class="btn btn-success mb-3"
+                       th:href="@{/}"> <i class="fas fa-truck white"></i>
+                        SHIPPED
+                    </a>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <div th:if="${order.status != 'Delivered'}">
+                    <a class="btn btn-success mb-3"
+                       th:href="@{/}"> <i class="fas fa-check-circle white"></i>
+                        DELIVERED
+                    </a>
+                </div>
+            </li>
+
+            <li class="nav-item">
+                <div th:if="${order.status != 'Cancelled' && hasAdminRole}">
+                    <a class="btn btn-success mb-3"
+                       th:href="@{/}"
+                       onclick="if (!(confirm('Are you sure you want to cancel this order?'))) return false"> <i
+                            class="fas fa-times-circle text-danger white"></i>
+                        CANCELLED
+                    </a>
+                </div>
+            </li>
+        </ul>
+    </div>
     <hr>
+
     <div class="element-with-padding">
         <table class="table table-hover">
             <tr>
@@ -99,7 +189,7 @@
                 <th>Quantity</th>
                 <th>Price Per Unit</th>
                 <th>Sub Total</th>
-                <th></th>
+                <th th:if="${isMyOrder && isPendingOrder}"></th>
             </tr>
 
             <tr th:each="item : ${order.items}">
@@ -109,10 +199,12 @@
                     <a><span th:text="${item.quantity}"> </span></a>
 
                     <a class="btn btn-info btn-sm"
-                       th:href="@{/checkOut/addItem(orderId=${order.id},orderItemId=${item.id})}">+</a>
+                       th:href="@{/checkOut/addItem(orderId=${order.id},orderItemId=${item.id})}"
+                       th:if="${isMyOrder && isPendingOrder}">+</a>
 
                     <a class="btn btn-info btn-sm"
-                       th:href="@{/checkOut/subtractItem(orderId=${order.id},orderItemId=${item.id})}">-</a>
+                       th:href="@{/checkOut/subtractItem(orderId=${order.id},orderItemId=${item.id})}"
+                       th:if="${isMyOrder && isPendingOrder}">-</a>
                 </td>
 
                 <td th:text="${item.product.price}"></td>
@@ -121,8 +213,9 @@
                 <td>
                     <a href="#"
                        th:href="@{/checkOut/deleteItem(orderItemId=${item.id})}"
-                       onclick="if (!(confirm('Are you sure you want to delete this item?'))) return false">
-                        <i class="fas fa-trash-alt text-danger"></i> <!-- Delete icon -->
+                       onclick="if (!(confirm('Are you sure you want to delete this item?'))) return false"
+                       th:if="${isMyOrder && isPendingOrder}">
+                        <i class="fas fa-trash-alt text-danger"></i>
                     </a>
                 </td>
             </tr>
@@ -132,7 +225,7 @@
                 <td colspan="2">Total</td>
                 <td th:text="${order.totalAmount}"></td>
                 <td></td>
-                <td></td>
+                <td th:if="${isMyOrder && isPendingOrder}"></td>
             </tr>
             </tfoot>
         </table>
@@ -148,7 +241,8 @@
             </a>
 
             <a class="button right"
-               th:href="@{/checkOut/confirm(orderId=${order.id})}">
+               th:href="@{/checkOut/confirm(orderId=${order.id})}"
+               th:if="${isMyOrder && isPendingOrder}">
                 CONFIRM ORDER AND PAY</a>
         </div>
     </div>

@@ -2,6 +2,7 @@ package com.leemccormick.posdemo.controllers;
 
 import com.leemccormick.posdemo.entity.Order;
 import com.leemccormick.posdemo.entity.OrderItem;
+import com.leemccormick.posdemo.entity.OrderStatus;
 import com.leemccormick.posdemo.entity.Product;
 import com.leemccormick.posdemo.service.order.OrderService;
 import com.leemccormick.posdemo.service.product.ProductService;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 enum SaveMode {
     ADD, UPDATE
@@ -180,7 +182,7 @@ public class MyStoreController {
     }
 
     @GetMapping("/checkOut")
-    public String checkOut(Model theModel) {
+    public String checkOut(Model theModel, Authentication authentication) {
         String customerName = userService.findUserFullName(currentOrder.getCustomerId());
         currentOrder = orderService.findOrderById(currentOrder.getId());
         String errorMessage = "";
@@ -194,6 +196,25 @@ public class MyStoreController {
         theModel.addAttribute("customerName", customerName);
         theModel.addAttribute("shouldShowError", shouldShowError);
         theModel.addAttribute("alertErrorMessage", errorMessage);
+
+        // Add more data when review order and update order 
+        String currentUserId = authentication.getName();
+        String authenticationRoles = authentication.getAuthorities().toString();
+        boolean hasCustomerRole = userService.hasCustomerRole(authenticationRoles);
+        boolean hasSaleRole = userService.hasSaleRole(authenticationRoles);
+        boolean hasAdminRole = userService.hasAdminRole(authenticationRoles);
+        boolean isMyOrder = hasCustomerRole && Objects.equals(currentUserId, currentOrder.getCustomerId());
+        boolean isPendingOrder = Objects.equals(currentOrder.getStatus(), OrderStatus.PENDING.getValue());
+        String adminOrSaleUsername = userService.findUserFullName(currentUserId);
+        String userRoles = userService.findRoles(authenticationRoles);
+
+        theModel.addAttribute("hasCustomerRole", hasCustomerRole);
+        theModel.addAttribute("hasSaleRole", hasSaleRole);
+        theModel.addAttribute("hasAdminRole", hasAdminRole);
+        theModel.addAttribute("isMyOrder", isMyOrder);
+        theModel.addAttribute("isPendingOrder", isPendingOrder);
+        theModel.addAttribute("adminOrSaleUsername", adminOrSaleUsername);
+        theModel.addAttribute("userRoles", userRoles);
 
         log.info(String.format("REVIEW ORDER PAGE TO UPDATE | Customer Name is Order is : %s : | --> Current Order is : %s  ", customerName, currentOrder));
         return "/review-order";

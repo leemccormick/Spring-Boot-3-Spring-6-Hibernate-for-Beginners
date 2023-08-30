@@ -117,11 +117,22 @@ public class OrderController {
     public String showOrderDetails(@RequestParam("orderId") int theOrderId, Authentication authentication, Model theModel) {
         try {
             Order theOrder = orderService.findOrderById(theOrderId);
+
+            String currentUserId = authentication.getName();
+            String authenticationRoles = authentication.getAuthorities().toString();
             String customerName = userService.findUserFullName(theOrder.getCustomerId());
+            String adminOrSaleUsername = userService.findUserFullName(currentUserId);
+            String userRoles = userService.findRoles(authenticationRoles);
             String errorMessage = "";
+
+            boolean hasCustomerRole = userService.hasCustomerRole(authenticationRoles);
+            boolean hasSaleRole = userService.hasSaleRole(authenticationRoles);
+            boolean hasAdminRole = userService.hasAdminRole(authenticationRoles);
+            boolean isMyOrder = hasCustomerRole && Objects.equals(currentUserId, theOrder.getCustomerId());
+            boolean isPendingOrder = Objects.equals(theOrder.getStatus(), OrderStatus.PENDING.getValue());
             boolean shouldShowError = false;
 
-            if (theOrder.getTotalAmount() == 0) {
+            if (theOrder.getTotalAmount() == 0 && isMyOrder && isPendingOrder) {
                 shouldShowError = true;
                 errorMessage = "Total amount must be grater than 0 to continue processing order. Please, try again.";
             }
@@ -130,6 +141,13 @@ public class OrderController {
             theModel.addAttribute("customerName", customerName);
             theModel.addAttribute("shouldShowError", shouldShowError);
             theModel.addAttribute("alertErrorMessage", errorMessage);
+            theModel.addAttribute("hasCustomerRole", hasCustomerRole);
+            theModel.addAttribute("hasSaleRole", hasSaleRole);
+            theModel.addAttribute("hasAdminRole", hasAdminRole);
+            theModel.addAttribute("isMyOrder", isMyOrder);
+            theModel.addAttribute("isPendingOrder", isPendingOrder);
+            theModel.addAttribute("adminOrSaleUsername", adminOrSaleUsername);
+            theModel.addAttribute("userRoles", userRoles);
 
             log.info(String.format("ORDER LIST PAGE --> GO TO SEE ORDER DETAIL | Customer Name is Order is : %s : | --> Current Order is : %s  ", customerName, theOrder));
             return "/review-order";
@@ -148,7 +166,7 @@ public class OrderController {
                 orderService.deleteOrder(theOrder);
                 log.info(String.format("ORDER LIST PAGE | SUCCESS DELETE ORDER | Deleted Order is  : %s --> ", theOrder));
             }
-            
+
             return "redirect:/orders";
         } catch (Exception exception) {
             log.error(String.format("ORDER LIST PAGE : DELETE ORDER : Error Exception is  : %s --> ", exception));
