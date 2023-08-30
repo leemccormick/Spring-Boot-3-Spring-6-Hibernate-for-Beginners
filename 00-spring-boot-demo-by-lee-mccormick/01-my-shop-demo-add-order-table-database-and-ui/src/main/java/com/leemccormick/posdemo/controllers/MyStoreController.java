@@ -51,31 +51,10 @@ public class MyStoreController {
             String currentUserId = authentication.getName();
             String authenticationRoles = authentication.getAuthorities().toString();
             String username = userService.findUserFullName(currentUserId);
-            boolean hasCustomerRole = authenticationRoles.toLowerCase().contains("Customer".toLowerCase());
-            boolean hasSaleRole = authenticationRoles.toLowerCase().contains("Sale".toLowerCase());
-            boolean hasAdminRole = authenticationRoles.toLowerCase().contains("Admin".toLowerCase());
-
-            String roles = "";
-            if (hasCustomerRole) {
-                roles += "Customer";
-            }
-
-            if (hasSaleRole) {
-                if (roles.isEmpty()) {
-                    roles = "Sale";
-                } else {
-                    roles += ", Sale";
-                }
-
-            }
-
-            if (hasAdminRole) {
-                if (roles.isEmpty()) {
-                    roles = "Admin";
-                } else {
-                    roles += ", Admin";
-                }
-            }
+            boolean hasCustomerRole = userService.hasCustomerRole(authenticationRoles);
+            boolean hasSaleRole = userService.hasSaleRole(authenticationRoles);
+            boolean hasAdminRole = userService.hasAdminRole(authenticationRoles);
+            String roles = userService.findRoles(authenticationRoles);
 
             model.addAttribute("products", listOfProducts);
             model.addAttribute("username", username);

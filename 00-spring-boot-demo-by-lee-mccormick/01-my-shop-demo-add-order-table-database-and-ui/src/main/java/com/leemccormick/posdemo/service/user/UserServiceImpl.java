@@ -45,4 +45,45 @@ public class UserServiceImpl implements UserService {
         User theUser = findById(theId);
         return theUser.getFirstName() + " " + theUser.getLastName();
     }
+
+    @Override
+    public String findRoles(String authenticationRoles) {
+        String roles = "";
+        if (hasCustomerRole(authenticationRoles)) {
+            roles += "Customer";
+        }
+
+        if (hasSaleRole(authenticationRoles)) {
+            if (roles.isEmpty()) {
+                roles = "Sale";
+            } else {
+                roles += ", Sale";
+            }
+
+        }
+
+        if (hasAdminRole(authenticationRoles)) {
+            if (roles.isEmpty()) {
+                roles = "Admin";
+            } else {
+                roles += ", Admin";
+            }
+        }
+        return roles;
+    }
+
+    @Override
+    public boolean hasCustomerRole(String authenticationRoles) {
+        return authenticationRoles.toLowerCase().contains("Customer".toLowerCase());
+    }
+
+    @Override
+    public boolean hasSaleRole(String authenticationRoles) {
+        return authenticationRoles.toLowerCase().contains("Sale".toLowerCase());
+    }
+
+    @Override
+    public boolean hasAdminRole(String authenticationRoles) {
+        return authenticationRoles.toLowerCase().contains("Admin".toLowerCase());
+    }
 }

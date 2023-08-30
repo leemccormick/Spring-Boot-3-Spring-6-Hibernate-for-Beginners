@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>ORDERS</title>
+
+    <!-- Boot Straps -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+          integrity="sha384-TwnJqaDEwY7wDd4cjgJ/6sF5oRTfl7E8Gttrj6j7e9kr6t8zlz6yOVtDmYcbPjqN" crossorigin="anonymous">
+
+    <!-- Style CSS for the page -->
+    <style>
+        h1 {
+      background-color: black;
+      color: white;
+      font-size: 36px;
+      text-align: center;
+      padding: 20px;
+      }
+      .element-with-padding {
+      padding-left: 20px;
+      padding-right: 20px;
+      }
+      a {
+      padding-top: 10px;
+      padding-right: 20px;
+      padding-bottom: 10px;
+      padding-left: 20px;
+      }
+      th {
+      padding: 8px;
+      text-align: left;
+      background-color:  #f2f2f2;
+      }
+      td {
+      text-align: left;
+      }
+      tfoot {
+      font-weight: bold;
+      background-color: #f2f2f2;
+      }
+      tfoot {
+      font-weight: bold;
+      background-color: #f2f2f2;
+      }
+      tfoot td {
+      text-align: right;
+      background-color: #f2f2f2;
+      }
+      .buttons-container {
+      display: flex;
+      gap: 20px;
+      margin-left: 20px;
+      margin-right: 20px;
+      }
+      .button {
+      padding: 10px 20px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      }
+      .button.right {
+      margin-left: auto;
+      background-color: #13ba23;
+      }
+      .nav {
+      display: flex;
+      justify-content: flex-end;
+      background-color: #383838;
+      }
+      .nav-item {
+      color: white;
+      margin: 0 5px;
+      border-radius: 5px;
+      }
+      .white {
+      color: white;
+      }
+    </style>
+</head>
+<body>
+<div class="receipt">
+    <h1>ORDER LIST</h1>
+
+    <ul class="nav justify-content-end" style="padding-top: 20px; padding-bottom: 10px;">
+        <li class="nav-item">User Name : <span th:text="${username}"></span></li>
+        <li class="nav-item"> |</li>
+
+        <li class="nav-item">User's Roles : <span th:text="${roles}"></span></li>
+        <li class="nav-item"> |</li>
+
+        <li class="nav-item">Total Orders : <span th:text="${totalOrders}"></span></li>
+        <li class="nav-item"></li>
+    </ul>
+
+    <ul class="nav justify-content-end" style="padding-top: 20px; padding-bottom: 10px;">
+        <li class="nav-item"> ORDER STATUS INFO :</li>
+        <li><i class="fas fa-hourglass-start white"></i></li>
+        <li class="nav-item"> PENDING</li>
+        <li class="nav-item"></li>
+        <li><i class="fas fa-cog white"></i></li>
+        <li class="nav-item"> PROCESSING</li>
+        <li class="nav-item"></li>
+        <li><i class="fas fa-truck white"></i></li>
+        <li class="nav-item"> SHIPPED</li>
+        <li class="nav-item"></li>
+        <li><i class="fas fa-check-circle white"></i></li>
+        <li class="nav-item"> DELIVERED</li>
+        <li class="nav-item"></li>
+        <li><i class="fas fa-times-circle text-danger white"></i></li>
+        <li class="nav-item"> CANCELLED</li>
+        <li class="nav-item"></li>
+    </ul>
+
+    <hr>
+
+    <div class="element-with-padding">
+        <table class="table table-hover">
+            <tr>
+                <th>ORDER ID</th>
+                <th>STATUS</th>
+                <th th:if="${hasSaleRole || hasAdminRole}">UPDATE STATUS ACTIONS</th>
+                <th>AMOUNT</th>
+                <th th:if="${hasSaleRole || hasAdminRole}">ORDER BY</th>
+                <th>ACTIONS</th>
+            </tr>
+
+            <tr th:each="item : ${orders}">
+                <td th:text="${item.id}"></td>
+
+                <!-- Order Status Section -->
+                <td>
+                    <p>
+                        <a th:if="${item.status == 'Pending'}">
+                            <i class="fas fa-hourglass-start"></i>
+                            <span th:text="${#strings.toUpperCase(item.status)}"></span>
+                        </a>
+                    </p>
+
+                    <p>
+                        <a th:if="${item.status == 'Processing'}">
+                            <i class="fas fa-cog"></i>
+                            <span th:text="${#strings.toUpperCase(item.status)}"></span>
+                        </a>
+                    </p>
+
+                    <p>
+                        <a th:if="${item.status == 'Shipped'}">
+                            <i class="fas fa-truck"></i>
+                            <span th:text="${#strings.toUpperCase(item.status)}"></span>
+                        </a>
+                    </p>
+
+                    <p>
+                        <a th:if="${item.status == 'Delivered'}">
+                            <i class="fas fa-check-circle"></i>
+                            <span th:text="${#strings.toUpperCase(item.status)}"></span>
+                        </a>
+                    </p>
+
+                    <p>
+                        <a th:if="${item.status == 'Cancelled'}">
+                            <i class="fas fa-times-circle text-danger"></i>
+                            <span th:text="${#strings.toUpperCase(item.status)}"></span>
+                        </a>
+                    </p>
+                </td>
+
+                <!-- Order Status Actions Section -->
+                <td th:if="${hasSaleRole || hasAdminRole}">
+                    <a th:if="${hasAdminRole}">
+                        <i class="fas fa-times-circle text-danger"></i>
+                    </a>
+
+                    <!-- TODO : See Order Detail Info -->
+                    <a th:if="${item.status == 'Pending'}">
+                        <i class="fas fa-info-circle"></i>
+                    </a>
+
+                    <!-- TODO : Update Status to Shipped -->
+                    <a th:if="${item.status == 'Processing'}">
+                        <i class="fas fa-truck"></i>
+                    </a>
+
+                    <!--TODO : Update Status to Delivery -->
+                    <a th:if="${item.status == 'Shipped'}">
+                        <i class="fas fa-check-circle"></i>
+                    </a>
+
+                    <!-- TODO : See Order Detail Info -->
+                    <a th:if="${item.status == 'Delivered'}">
+                        <i class="fas fa-info-circle"></i>
+                    </a>
+
+                    <!-- TODO : See Order Detail Info -->
+                    <a>
+                        <i th:if="${item.status == 'Cancelled'}" class="fas fa-info-circle"></i>
+                    </a>
+                </td>
+
+                <td>
+                    <a>$ <span th:text="${item.totalAmount}"> </span></a>
+                </td>
+
+                <!-- TODO : Fetch Customer Name -->
+                <td th:if="${hasSaleRole || hasAdminRole}"> By Customer Name</td>
+
+                <!-- Action Buttons For Product -->
+                <td>
+                    <!-- TODO: Go to order detail and allow to update order status -->
+                    <a th:if="${hasCustomerRole}"
+                       class="btn btn-success btn-sm">
+                        See Order Details
+                    </a>
+
+                    <!-- TODO: Go to order detail and allow to update order status -->
+                    <a th:if="${hasSaleRole || hasAdminRole}"
+                       class="btn btn-info btn-sm">
+                        Update
+                    </a>
+
+                    <a th:if="${hasAdminRole}"
+                       class="btn btn-danger btn-sm"
+                       onclick="if (!(confirm('Are you sure you want to delete this order?'))) return false">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+
+            <tfoot>
+            <tr>
+                <td colspan="2">
+                    <span th:text="${totalSalesDescription}"></span>
+                </td>
+                <td>
+                    <a>$ <span th:text="${totalSales}"></span> </a>
+                </td>
+                <td th:if="${hasSaleRole || hasAdminRole}"></td>
+                <td th:if="${hasSaleRole || hasAdminRole}"></td>
+                <td></td>
+            </tr>
+            </tfoot>
+        </table>
+
+        <div class="buttons-container">
+            <a class="button"
+               th:href="@{/}">
+                BACK TO HOME
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+

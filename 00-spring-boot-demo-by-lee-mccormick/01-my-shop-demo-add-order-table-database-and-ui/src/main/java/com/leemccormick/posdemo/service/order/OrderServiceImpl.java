@@ -71,6 +71,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public List<Order> findOrdersForCustomer(String customerId) {
+        return orderDAO.findOrdersForTheCustomer(customerId);
+    }
+
+    @Override
     public Order findOrderById(int theId) {
         Optional<Order> result = orderRepository.findById(theId);
 
@@ -123,6 +128,15 @@ public class OrderServiceImpl implements OrderService {
 
             return firstPendingOrder;
         }
+    }
+
+    @Override
+    public double findTotalSales(List<Order> theListOfOrder) {
+        double nReturnTotalSales = 0;
+        for (Order order : theListOfOrder) {
+            nReturnTotalSales += order.getTotalAmount();
+        }
+        return nReturnTotalSales;
     }
 
     // UPDATE

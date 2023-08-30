@@ -61,20 +61,23 @@
 <!-- Navigation Section User Detail and Logout button -->
 <ul class="nav justify-content-end" style="padding-top: 20px; padding-bottom: 0px;">
     <li class="nav-item">Welcome ! <span th:text="${username}"></span></li>
+    <li class="nav-item"> | </li>
+    <li class="nav-item">Roles : <span th:text="${roles}"></span></li>
+</ul>
 
+<ul class="nav justify-content-end" style="padding-top: 10px; padding-bottom: 20px;">
     <li class="nav-item">
         <form action="" th:action="@{/logout}" method="POST" class="form-horizontal">
             <input type="submit" value="Logout"/>
         </form>
     </li>
-</ul>
 
-<ul class="nav justify-content-end" style="padding-top: 10px; padding-bottom: 20px;">
-    <div class="element-with-padding">
-        <li class="nav-item">Roles : <span th:text="${roles}"></span></li>
-    </div>
+    <li class="nav-item">
+        <form action="" th:action="@{/orders}" method="GET" class="form-horizontal">
+            <input type="submit" value="View Orders"/>
+        </form>
+    </li>
 </ul>
-<hr>
 
 <!-- SALE and Admin Navigation Link Section -->
 <div class="element-with-padding" th:if="${hasSaleRole}">

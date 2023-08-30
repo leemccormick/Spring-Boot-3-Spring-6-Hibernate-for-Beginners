@@ -11,4 +11,12 @@ public interface UserService {
     User findById(String theId);
 
     String findUserFullName(String theId);
+
+    String findRoles(String authenticationRoles);
+
+    boolean hasCustomerRole(String authenticationRoles);
+
+    boolean hasSaleRole(String authenticationRoles);
+
+    boolean hasAdminRole(String authenticationRoles);
 }

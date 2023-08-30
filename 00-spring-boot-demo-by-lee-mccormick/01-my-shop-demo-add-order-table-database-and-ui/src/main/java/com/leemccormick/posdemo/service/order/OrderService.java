@@ -17,11 +17,15 @@ public interface OrderService {
     // READ
     List<Order> findAllOrders();
 
+    List<Order> findOrdersForCustomer(String customerId);
+
     Order findOrderById(int theId);
 
     OrderItem findOrderItemById(int theOrderItemId);
 
     Order findPendingOrderForTheCustomer(String customerId);
+
+    double findTotalSales(List<Order> theListOfOrder);
 
     // UPDATE
     Order updateOrder(Order theOrder, String userId);
