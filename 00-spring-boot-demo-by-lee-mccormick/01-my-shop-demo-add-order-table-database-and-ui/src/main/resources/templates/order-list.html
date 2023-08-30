@@ -206,8 +206,9 @@
                     <a>$ <span th:text="${item.totalAmount}"> </span></a>
                 </td>
 
-                <!-- TODO : Fetch Customer Name -->
-                <td th:if="${hasSaleRole || hasAdminRole}"> By Customer Name</td>
+                <td th:if="${hasSaleRole || hasAdminRole}">
+                    <a><span th:text="${item.customer.username}"> </span></a>
+                </td>
 
                 <!-- Action Buttons For Product -->
                 <td>
@@ -215,12 +216,6 @@
                     <a th:if="${hasCustomerRole}"
                        class="btn btn-success btn-sm">
                         See Order Details
-                    </a>
-
-                    <!-- TODO: Go to order detail and allow to update order status -->
-                    <a th:if="${hasSaleRole || hasAdminRole}"
-                       class="btn btn-info btn-sm">
-                        Update
                     </a>
 
                     <a th:if="${hasAdminRole}"

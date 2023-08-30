@@ -42,6 +42,10 @@ public class Order {
     @JoinColumn(name = "order_id")
     private List<OrderItem> items;
 
+    @ManyToOne // Many orders can belong to one customer
+    @JoinColumn(name = "customer_id", insertable = false, updatable = false) // This specifies the foreign key column
+    private User customer;
+
     public Order() {
 
     }
@@ -135,6 +139,14 @@ public class Order {
         items.add(theItem);
     }
 
+    public User getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(User customer) {
+        this.customer = customer;
+    }
+
     @Override
     public String toString() {
         return "Order{" +
@@ -147,6 +159,7 @@ public class Order {
                 ", createdBy='" + createdBy + '\'' +
                 ", updatedBy='" + updatedBy + '\'' +
                 ", items=" + items +
+                ", customer=" + customer +
                 '}';
     }
 }
