@@ -51,6 +51,23 @@
        cursor: pointer;
        border-radius: 5px;
        }
+        /* Style for the <p> tag */
+        p {
+            font-family: Arial, sans-serif;
+            font-size: 20px;
+            color: #333; /* Text color */
+            margin: 10px 0; /* Adding some margin around the <p> element */
+        }
+        /* Style for the <a> tag */
+        a {
+            color: blue; /* Link color */
+            text-decoration: none; /* Remove underline */
+            font-weight: bold;
+        }
+        /* Style for the <a> tag when hovered */
+        a:hover {
+            color: red; /* Change link color on hover */
+        }
     </style>
 </head>
 
@@ -61,7 +78,7 @@
 <!-- Navigation Section User Detail and Logout button -->
 <ul class="nav justify-content-end" style="padding-top: 20px; padding-bottom: 0px;">
     <li class="nav-item">Welcome ! <span th:text="${username}"></span></li>
-    <li class="nav-item"> | </li>
+    <li class="nav-item"> |</li>
     <li class="nav-item">Roles : <span th:text="${roles}"></span></li>
 </ul>
 
@@ -80,19 +97,18 @@
 </ul>
 
 <!-- SALE and Admin Navigation Link Section -->
-<div class="element-with-padding" th:if="${hasSaleRole}">
+<div class="element-with-padding">
     <p>
-        <a th:href="@{/sellers}">Sale Meeting</a>
+        <a th:if="${hasSaleRole}" th:href="@{/sellers}">SALE MEETING</a>
         (Only for Sale Peeps)
     </p>
-</div>
 
-<div class="element-with-padding" th:if="${hasAdminRole}">
     <p>
-        <a th:href="@{/systems}">IT Systems Meeting</a>
+        <a th:if="${hasAdminRole}" th:href="@{/systems}">IT SYSTEMS MEETING</a>
         (Only for Admin Peeps)
     </p>
 </div>
+
 <hr th:if="${hasSaleRole || hasAdminRole}">
 
 <!-- Add Product and Checkout Buttons Section -->
