@@ -1,26 +1,47 @@
 package com.leemccormick.posdemo.service.user;
 
+import com.leemccormick.posdemo.dao.RoleRepository;
 import com.leemccormick.posdemo.dao.UserRepository;
 import com.leemccormick.posdemo.entity.User;
+import com.leemccormick.posdemo.entity.UserDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
+    private RoleRepository roleRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository theUserRepository) {
+    public UserServiceImpl(UserRepository theUserRepository,
+                           RoleRepository theRoleRepository
+    ) {
         userRepository = theUserRepository;
+        roleRepository = theRoleRepository;
     }
 
     // READ
     @Override
     public List<User> findAllUsers() {
         return userRepository.findAll();
+    }
+
+    // TODO : Continue here for roles details.
+    @Override
+    public List<UserDetail> findAllUsersWithDetails() {
+        List<User> allUsers = findAllUsers();
+        List<UserDetail> nReturnListOfUserDetail = new ArrayList<>();
+
+        for (User theUser: allUsers) {
+            UserDetail newUser = new UserDetail();
+
+        }
+
+        return null;
     }
 
     @Override

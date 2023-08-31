@@ -14,6 +14,11 @@
      text-align: center;
      padding: 20px;
      }
+      h3 {
+     color: black;
+     font-size: 18px;
+     text-align: left;
+     }
      .buttons-container {
       display: flex;
       gap: 20px;
@@ -36,8 +41,8 @@
 <h2> Thank you for ordering at my store, we will process your order soon.</h2>
 <hr>
 
-<h3> Order Number : <span th:text="${processingOrder.id}"></span> | Total : $<span
-        th:text="${processingOrder.totalAmount}"></span></h3>
+<h3> Order Number : <span th:text="${processingOrder.id}"></span></h3>
+<h3> Total : $<span th:text="${processingOrder.totalAmount}"></span></h3>
 <hr>
 
 <div class="buttons-container">
