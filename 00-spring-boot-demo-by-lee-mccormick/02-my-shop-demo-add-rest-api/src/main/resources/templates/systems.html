@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>MY STORE SYSTEMS Home Page</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+          integrity="sha384-TwnJqaDEwY7wDd4cjgJ/6sF5oRTfl7E8Gttrj6j7e9kr6t8zlz6yOVtDmYcbPjqN" crossorigin="anonymous">
+    <style>
+        h1 {
+    background-color: black;
+    color: white;
+    font-size: 36px;
+    text-align: center;
+    padding: 20px;
+    }
+    h2 {
+    background-color: lightGray;
+    color: black;
+    font-size: 25px;
+    text-align: center;
+    padding: 20px;
+    }
+    h3 {
+     color: black;
+     font-size: 18px;
+     text-align: left;
+     }
+    .buttons-container {
+    display: flex;
+    gap: 20px;
+    margin-left: 20px;
+    margin-right: 20px;
+    }
+    .button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    }
+    .element-with-padding {
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 20px;
+    }
+    th {
+    padding: 8px;
+    text-align: left;
+    background-color:  #f2f2f2;
+    color: black;
+    }
+    td {
+    text-align: left;
+    }
+    tfoot {
+    font-weight: bold;
+    background-color: #f2f2f2;
+    }
+    tfoot {
+    font-weight: bold;
+    background-color: #f2f2f2;
+    }
+    tfoot td {
+    text-align: center;
+    background-color: #f2f2f2;
+    }
+    </style>
+</head>
+
+<body>
+<h1>MY STORE DEMO</h1>
+<h2>SYSTEMS HOME PAGE</h2>
+<hr>
+
+<p>
+    We have annual holiday Caribbean cruise coming up. Register Now!
+    <br>
+    Keep this trip a secret, don't tell a regular employees LOL :-)
+</p>
+<hr>
+
+<!-- User List Section -->
+<div class="element-with-padding">
+    <table class="table table-hover">
+        <thead class="table-dark">
+        <tr>
+            <th>User Name</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Email</th>
+            <th>Address</th>
+            <th>Phone Number</th>
+            <th>Is Customer</th>
+            <th>Is Sale</th>
+            <th>Is Admin</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:each="tempUserDetails : ${listOfUserDetails}">
+            <td th:text="${tempUserDetails.user.username}"></td>
+            <td th:text="${tempUserDetails.user.firstName}"></td>
+            <td th:text="${tempUserDetails.user.lastName}"></td>
+            <td th:text="${tempUserDetails.user.email}"></td>
+            <td th:text="${tempUserDetails.user.address}"></td>
+            <td th:text="${tempUserDetails.user.phoneNumber}"></td>
+
+            <td>
+                <p>
+                    <a th:if="${tempUserDetails.hasCustomerRole}">
+                        <i class="fas fa-check"></i>
+                    </a>
+                </p>
+            </td>
+
+            <td>
+                <p>
+                    <a th:if="${tempUserDetails.hasSaleRole}">
+                        <i class="fas fa-check"></i>
+                    </a>
+                </p>
+            </td>
+
+            <td>
+                <p>
+                    <a th:if="${tempUserDetails.hasAdminRole}">
+                        <i class="fas fa-check"></i>
+                    </a>
+                </p>
+            </td>
+        </tr>
+        </tbody>
+
+        <tfoot>
+        <tr>
+            <td colspan="2"> Total Users : <span th:text="${totalUsers}"></span></td>
+            <td colspan="2"> Number Of Customers : <span th:text="${totalCustomers}"></span></td>
+            <td colspan="2"> Number Of Sales : <span th:text="${totalSales}"></span></td>
+            <td colspan="3"> Number Of Admins : <span th:text="${totalAdmins}"></span></td>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+
+<div class="buttons-container">
+    <a class="button"
+       th:href="@{/}">
+        BACK TO HOME
+    </a>
+</div>
+
+</body>
+</html>
