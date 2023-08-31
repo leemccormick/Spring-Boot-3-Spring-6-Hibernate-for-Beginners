@@ -2,6 +2,8 @@ package com.leemccormick.posdemo.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
@@ -34,11 +36,16 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // 1) Configure HTTP Authorization
         http.authorizeHttpRequests(configurer ->
                         configurer
                                 .requestMatchers("/").hasRole("CUSTOMER")
                                 .requestMatchers("/sellers/**").hasRole("SALE")
                                 .requestMatchers("/systems/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/mystoredemo/products/**").hasRole("CUSTOMER")
+                                .requestMatchers(HttpMethod.POST, "/api/mystoredemo/products/**").hasAnyRole("SALE", "ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/api/mystoredemo/products/**").hasAnyRole("SALE", "ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/api/mystoredemo/products/**").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )
                 .formLogin(form ->
@@ -55,6 +62,12 @@ public class SecurityConfig {
                                 .accessDeniedPage("/access-denied") // access-denied --> we can named it to anything else...
                 );
 
+        // 2) Use HTTP Basic authentication --> Need this line for Basic Auth in PostMan
+        http.httpBasic(Customizer.withDefaults());
+
+        // 3) Disable Cross Site Request Forgery (CSRF)
+        // In general, not required for stateless REST APIs that use POST, PUT, DELETE and / or PATCH
+        http.csrf(csrf -> csrf.disable());
         return http.build();
     }
 }
