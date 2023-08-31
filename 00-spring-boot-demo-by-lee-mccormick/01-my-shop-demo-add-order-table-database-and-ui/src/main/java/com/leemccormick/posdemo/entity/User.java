@@ -2,8 +2,8 @@ package com.leemccormick.posdemo.entity;
 
 import jakarta.persistence.*;
 
-import java.util.Date;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -30,6 +30,10 @@ public class User {
 
     @Column(name = "phone_number")
     private String phoneNumber;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private List<Role> roles;
 
     public User() {
 
@@ -101,16 +105,90 @@ public class User {
         this.phoneNumber = phoneNumber;
     }
 
+    public List<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
+    }
+
+    public String getRolesDescription() {
+        String rolesDescription = "";
+        if (hasCustomerRole()) {
+            rolesDescription += "Customer";
+        }
+
+        if (hasSaleRole()) {
+            if (rolesDescription.isEmpty()) {
+                rolesDescription = "Sale";
+            } else {
+                rolesDescription += ", Sale";
+            }
+
+        }
+
+        if (hasAdminRole()) {
+            if (rolesDescription.isEmpty()) {
+                rolesDescription = "Admin";
+            } else {
+                rolesDescription += ", Admin";
+            }
+        }
+        return rolesDescription;
+    }
+
+    public boolean hasCustomerRole() {
+        boolean hasCustomerRole = false;
+        for (Role theRole : this.roles) {
+            if (theRole.getRoleDescription().toLowerCase().contains("Customer".toLowerCase())) {
+                hasCustomerRole = true;
+                break;
+            }
+        }
+        return hasCustomerRole;
+    }
+
+    public boolean hasSaleRole() {
+        boolean hasSaleRole = false;
+        for (Role theRole : this.roles) {
+            if (theRole.getRoleDescription().toLowerCase().contains("Sale".toLowerCase())) {
+                hasSaleRole = true;
+                break;
+            }
+        }
+        return hasSaleRole;
+    }
+
+    public boolean hasAdminRole() {
+        boolean hasAdminRoles = false;
+        for (Role theRole : this.roles) {
+            if (theRole.getRoleDescription().toLowerCase().contains("Admin".toLowerCase())) {
+                hasAdminRoles = true;
+                break;
+            }
+        }
+        return hasAdminRoles;
+    }
+
+    public void addRole(Role theRole) {
+        if (roles == null) {
+            roles = new ArrayList<>();
+        }
+        roles.add(theRole);
+    }
+
     @Override
     public String toString() {
         return "User{" +
-                "id=" + id +
+                "id='" + id + '\'' +
                 ", username='" + username + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 ", address='" + address + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
+                ", roles=" + roles +
                 '}';
     }
 }

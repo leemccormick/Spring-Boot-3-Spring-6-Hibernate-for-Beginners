@@ -1,7 +1,8 @@
 package com.leemccormick.posdemo.service.user;
 
-import com.leemccormick.posdemo.dao.RoleRepository;
-import com.leemccormick.posdemo.dao.UserRepository;
+import com.leemccormick.posdemo.dao.User.UserDAO;
+import com.leemccormick.posdemo.dao.User.UserRepository;
+import com.leemccormick.posdemo.entity.Role;
 import com.leemccormick.posdemo.entity.User;
 import com.leemccormick.posdemo.entity.UserDetail;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +15,14 @@ import java.util.Optional;
 @Service
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
-    private RoleRepository roleRepository;
+    private UserDAO userDAO;
 
     @Autowired
     public UserServiceImpl(UserRepository theUserRepository,
-                           RoleRepository theRoleRepository
+                           UserDAO theUserDAO
     ) {
         userRepository = theUserRepository;
-        roleRepository = theRoleRepository;
+        userDAO = theUserDAO;
     }
 
     // READ
@@ -30,18 +31,39 @@ public class UserServiceImpl implements UserService {
         return userRepository.findAll();
     }
 
-    // TODO : Continue here for roles details.
     @Override
     public List<UserDetail> findAllUsersWithDetails() {
         List<User> allUsers = findAllUsers();
         List<UserDetail> nReturnListOfUserDetail = new ArrayList<>();
 
-        for (User theUser: allUsers) {
-            UserDetail newUser = new UserDetail();
-
+        for (User theUser : allUsers) {
+            List<Role> roles = userDAO.findRolesByUserId(theUser.getId());
+            theUser.setRoles(roles);
+            UserDetail newUserWithDetail = new UserDetail(theUser);
+            nReturnListOfUserDetail.add(newUserWithDetail);
         }
 
-        return null;
+        return nReturnListOfUserDetail;
+    }
+
+    @Override
+    public int getTotalNumberOfUsers() {
+        return findAllUsers().size();
+    }
+
+    @Override
+    public int getTotalNumberOfCustomerRoles() {
+        return userDAO.findCustomerRoles().size();
+    }
+
+    @Override
+    public int getTotalNumberOfSaleRoles() {
+        return userDAO.findSaleRoles().size();
+    }
+
+    @Override
+    public int getTotalNumberOfAdminRoles() {
+        return userDAO.findAdminRoles().size();
     }
 
     @Override

@@ -11,6 +11,14 @@ public interface UserService {
 
     List<UserDetail> findAllUsersWithDetails();
 
+    int getTotalNumberOfUsers();
+
+    int getTotalNumberOfCustomerRoles();
+
+    int getTotalNumberOfSaleRoles();
+
+    int getTotalNumberOfAdminRoles();
+
     User findById(String theId);
 
     String findUserFullName(String theId);

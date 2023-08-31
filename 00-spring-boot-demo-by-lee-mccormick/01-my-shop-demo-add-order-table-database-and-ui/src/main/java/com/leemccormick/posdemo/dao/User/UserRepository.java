@@ -1,4 +1,4 @@
-package com.leemccormick.posdemo.dao;
+package com.leemccormick.posdemo.dao.User;
 
 import com.leemccormick.posdemo.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

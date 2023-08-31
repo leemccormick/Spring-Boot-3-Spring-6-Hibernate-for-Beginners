@@ -1,9 +1,6 @@
 package com.leemccormick.posdemo.service.order;
 
-import com.leemccormick.posdemo.entity.ErrorResponse;
-import com.leemccormick.posdemo.entity.Order;
-import com.leemccormick.posdemo.entity.OrderItem;
-import com.leemccormick.posdemo.entity.Product;
+import com.leemccormick.posdemo.entity.*;
 
 import java.util.List;
 
@@ -29,6 +26,8 @@ public interface OrderService {
     double findTotalSales(List<Order> theListOfOrder);
 
     ErrorResponse validateOrderBeforeProcessing(Order theOrder);
+
+    SaleInfo findSaleInfo();
 
     // UPDATE
     Order updateOrder(Order theOrder, String userId);

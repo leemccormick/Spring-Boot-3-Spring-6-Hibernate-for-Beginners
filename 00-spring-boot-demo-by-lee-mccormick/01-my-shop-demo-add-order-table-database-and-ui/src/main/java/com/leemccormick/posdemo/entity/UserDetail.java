@@ -11,12 +11,12 @@ public class UserDetail {
 
     }
 
-    public UserDetail(User user, String roles, boolean hasCustomerRole, boolean hasSaleRole, boolean hasAdminRole) {
+    public UserDetail(User user) {
         this.user = user;
-        this.roles = roles;
-        this.hasCustomerRole = hasCustomerRole;
-        this.hasSaleRole = hasSaleRole;
-        this.hasAdminRole = hasAdminRole;
+        this.roles = user.getRolesDescription();
+        this.hasCustomerRole = user.hasCustomerRole();
+        this.hasSaleRole = user.hasSaleRole();
+        this.hasAdminRole = user.hasAdminRole();
     }
 
     public User getUser() {

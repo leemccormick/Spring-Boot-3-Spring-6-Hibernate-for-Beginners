@@ -100,13 +100,26 @@ public class MyStoreController {
 
     // Add Request Mapping for /sellers to show sellers.html
     @GetMapping("/sellers")
-    public String showSellers() {
+    public String showSellers(Model theModel) {
+        SaleInfo info = orderService.findSaleInfo();
+        theModel.addAttribute("info", info);
+
+        log.info(String.format("SELLER PAGE : SaleInfo is : %s --> ", info));
         return "sellers";
     }
 
     // Add Request Mapping for /systems to show systems.html
     @GetMapping("/systems")
-    public String showSystems() {
+    public String showSystems(Model theModel) {
+        List<UserDetail> allUserDetails = userService.findAllUsersWithDetails();
+
+        theModel.addAttribute("listOfUserDetails", allUserDetails);
+        theModel.addAttribute("totalUsers", userService.getTotalNumberOfUsers());
+        theModel.addAttribute("totalCustomers", userService.getTotalNumberOfCustomerRoles());
+        theModel.addAttribute("totalSales", userService.getTotalNumberOfSaleRoles());
+        theModel.addAttribute("totalAdmins", userService.getTotalNumberOfAdminRoles());
+
+        log.info(String.format("ADMIN PAGE : List Of UserDetail : %s --> %s", allUserDetails.size(), allUserDetails));
         return "systems";
     }
 

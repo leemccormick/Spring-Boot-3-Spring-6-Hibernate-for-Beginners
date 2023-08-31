@@ -54,35 +54,34 @@
 </p>
 <hr>
 
-<!--<h3> Order Number : <span th:text="${processingOrder.id}"></span></h3>-->
-<h3> Total Orders : </h3>
-<h3> Total Amount Sales For All Orders : </h3>
+<h3> Number Of All Orders : <span th:text="${info.countOfAllOrders}"></span></h3>
+<h3> Total Amount Sales For All Orders : $<span th:text="${info.totalAmountSalesOfAllOrders}"></span></h3>
 <hr>
 
-<h3> Total Orders For Pending Status : </h3>
-<h3> Total Amount Sales Pending Orders : </h3>
+<h3> Number Of Pending Orders : <span th:text="${info.countOfPendingOrders}"></span></h3>
+<h3> Total Amount Sales For Pending Orders : $<span th:text="${info.totalAmountSalesOfPendingOrders}"></span></h3>
 <hr>
 
-<h3> Total Orders For Processing Status : </h3>
-<h3> Total Amount Sales Processing Orders : </h3>
+<h3> Number Of Processing Orders : <span th:text="${info.countOfProcessingOrders}"></span></h3>
+<h3> Total Amount Sales For Processing Orders : $<span th:text="${info.totalAmountSalesOfProcessingOrders}"></span></h3>
 <hr>
 
-<h3> Total Orders For Shipped Status : </h3>
-<h3> Total Amount Sales Shipped Orders : </h3>
+<h3> Number Of Shipped Orders : <span th:text="${info.countOfShippedOrders}"></span></h3>
+<h3> Total Amount Sales For Shipped Orders : $<span th:text="${info.totalAmountSalesOfShippedOrders}"></span></h3>
 <hr>
 
-<h3> Total Orders For Delivered Status : </h3>
-<h3> Total Amount Sales Delivered Orders : </h3>
+<h3> Number Of Delivered Orders : <span th:text="${info.countOfDeliveredOrders}"></span></h3>
+<h3> Total Amount Sales For Delivered Orders : $<span th:text="${info.totalAmountSalesOfDeliveredOrders}"></span></h3>
 <hr>
 
-<h3> Total Orders For Cancelled Status : </h3>
-<h3> Total Amount Sales Cancelled Orders : </h3>
+<h3> Number Of Cancelled Orders : <span th:text="${info.countOfCancelledOrders}"></span></h3>
+<h3> Total Amount Sales For Cancelled Orders : $<span th:text="${info.totalAmountSalesOfCancelledOrders}"></span></h3>
 <hr>
 
-<h3> Total Products : </h3>
-<h3> Total Products Items : </h3>
-<h3> Total Products Amount : </h3>
-<h3> Total Products out of stock : </h3>
+<h3> Number Of Products : <span th:text="${info.countOfProducts}"></span></h3>
+<h3> Number Of Product's Items : <span th:text="${info.countOfProductsItem}"></span></h3>
+<h3> Number Of Out Of Stock Product : <span th:text="${info.countOfProductsOutOfStock}"></span></h3>
+<h3> Total Products Amount : $<span th:text="${info.totalAmountOfProducts}"></span></h3>
 <hr>
 
 <div class="buttons-container">

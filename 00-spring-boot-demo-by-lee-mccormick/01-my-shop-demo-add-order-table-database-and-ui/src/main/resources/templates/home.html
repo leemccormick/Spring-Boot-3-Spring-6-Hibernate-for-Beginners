@@ -98,13 +98,13 @@
 
 <!-- SALE and Admin Navigation Link Section -->
 <div class="element-with-padding">
-    <p>
-        <a th:if="${hasSaleRole}" th:href="@{/sellers}">SALE MEETING</a>
+    <p th:if="${hasSaleRole}">
+        <a th:href="@{/sellers}">SALE MEETING</a>
         (Only for Sale Peeps)
     </p>
 
-    <p>
-        <a th:if="${hasAdminRole}" th:href="@{/systems}">IT SYSTEMS MEETING</a>
+    <p th:if="${hasAdminRole}">
+        <a th:href="@{/systems}">IT SYSTEMS MEETING</a>
         (Only for Admin Peeps)
     </p>
 </div>

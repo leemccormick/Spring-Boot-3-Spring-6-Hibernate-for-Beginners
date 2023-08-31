@@ -172,6 +172,63 @@ public class OrderServiceImpl implements OrderService {
         return newErrorResponse;
     }
 
+    @Override
+    public SaleInfo findSaleInfo() {
+        SaleInfo info = new SaleInfo();
+
+        // Get Data
+        List<Order> allOrders = findAllOrders();
+        List<Product> allProducts = productRepository.findAll();
+
+        // Assign Data
+        info.setCountOfAllOrders(allOrders.size());
+        info.setCountOfProducts(allProducts.size());
+
+        // Calculate All Orders Summary
+        for (Order theOrder : allOrders) {
+            info.setTotalAmountSalesOfAllOrders(info.getTotalAmountSalesOfAllOrders() + theOrder.getTotalAmount());
+
+            if (theOrder.getStatus().equals(OrderStatus.PENDING.getValue())) {
+                info.setCountOfPendingOrders(info.getCountOfPendingOrders() + 1);
+                info.setTotalAmountSalesOfPendingOrders(info.getTotalAmountSalesOfPendingOrders() + theOrder.getTotalAmount());
+            }
+
+            if (theOrder.getStatus().equals(OrderStatus.PROCESSING.getValue())) {
+                info.setCountOfProcessingOrders(info.getCountOfProcessingOrders() + 1);
+                info.setTotalAmountSalesOfProcessingOrders(info.getTotalAmountSalesOfProcessingOrders() + theOrder.getTotalAmount());
+            }
+
+            if (theOrder.getStatus().equals(OrderStatus.SHIPPED.getValue())) {
+                info.setCountOfShippedOrders(info.getCountOfShippedOrders() + 1);
+                info.setTotalAmountSalesOfShippedOrders(info.getTotalAmountSalesOfShippedOrders() + theOrder.getTotalAmount());
+            }
+
+            if (theOrder.getStatus().equals(OrderStatus.DELIVERED.getValue())) {
+                info.setCountOfDeliveredOrders(info.getCountOfDeliveredOrders() + 1);
+                info.setTotalAmountSalesOfDeliveredOrders(info.getTotalAmountSalesOfDeliveredOrders() + theOrder.getTotalAmount());
+            }
+
+            if (theOrder.getStatus().equals(OrderStatus.CANCELLED.getValue())) {
+                info.setCountOfCancelledOrders(info.getCountOfCancelledOrders() + 1);
+                info.setTotalAmountSalesOfCancelledOrders(info.getTotalAmountSalesOfCancelledOrders() + theOrder.getTotalAmount());
+            }
+        }
+
+        // Calculate All Products Summary
+        for (Product theProduce : allProducts) {
+            if (theProduce.getQuantity() == 0) {
+                info.setCountOfProductsOutOfStock(info.getCountOfProductsOutOfStock() + 1);
+            } else {
+                info.setCountOfProductsItem(info.getCountOfProductsItem() + theProduce.getQuantity());
+
+                double totalProductAmount = theProduce.getPrice() * theProduce.getQuantity();
+                info.setTotalAmountOfProducts(info.getTotalAmountOfProducts() + totalProductAmount);
+            }
+        }
+
+        return info;
+    }
+
     // UPDATE
     @Override
     public Order updateOrder(Order theOrder, String userId) {
