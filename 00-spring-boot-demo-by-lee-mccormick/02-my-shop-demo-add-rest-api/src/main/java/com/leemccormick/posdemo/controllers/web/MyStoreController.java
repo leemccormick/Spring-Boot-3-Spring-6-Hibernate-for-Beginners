@@ -1,4 +1,4 @@
-package com.leemccormick.posdemo.controllers;
+package com.leemccormick.posdemo.controllers.web;
 
 import com.leemccormick.posdemo.entity.*;
 import com.leemccormick.posdemo.service.order.OrderService;

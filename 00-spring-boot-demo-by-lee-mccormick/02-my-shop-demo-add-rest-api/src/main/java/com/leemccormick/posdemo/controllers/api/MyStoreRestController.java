@@ -1,4 +1,4 @@
-package com.leemccormick.posdemo.controllers;
+package com.leemccormick.posdemo.controllers.api;
 
 import com.leemccormick.posdemo.entity.OrderItem;
 import com.leemccormick.posdemo.entity.Product;
