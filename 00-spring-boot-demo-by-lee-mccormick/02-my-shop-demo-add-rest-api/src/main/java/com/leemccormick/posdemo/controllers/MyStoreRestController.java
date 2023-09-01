@@ -2,6 +2,8 @@ package com.leemccormick.posdemo.controllers;
 
 import com.leemccormick.posdemo.entity.OrderItem;
 import com.leemccormick.posdemo.entity.Product;
+import com.leemccormick.posdemo.entity.SaleInfo;
+import com.leemccormick.posdemo.entity.UserDetail;
 import com.leemccormick.posdemo.service.order.OrderService;
 import com.leemccormick.posdemo.service.product.ProductService;
 import com.leemccormick.posdemo.service.user.UserService;
@@ -51,6 +53,19 @@ public class MyStoreRestController {
             return ResponseEntity.ok(listOfProduct);
         } catch (Exception exception) {
             log.error(String.format("API | GET --> /products  : Error Exception is  : %s --> ", exception));
+            return ResponseEntity.ofNullable(null);
+        }
+    }
+
+    @GetMapping("/products/productDetails")
+    public ResponseEntity<Product> findProduct(@RequestParam("productId") int theProductId) {
+        try {
+            Product theProduct = productService.findById(theProductId);
+            log.info(String.format("API | GET --> /products with productId param  : Success with Product is  : %s --> ", theProduct));
+            return ResponseEntity.ok(theProduct);
+        } catch (Exception exception) {
+            String errorMessage = "Failed to add new product. Error Exception is " + exception.getMessage();
+            log.error(String.format("API | GET --> /products with productId param  : Error Exception is  : %s -->", errorMessage));
             return ResponseEntity.ofNullable(null);
         }
     }
@@ -105,6 +120,65 @@ public class MyStoreRestController {
         } catch (Exception exception) {
             log.error(String.format("API | DELETE --> /products  : Error Exception is  : %s --> ", exception.getMessage()));
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false);
+        }
+    }
+
+    // ONLY FOR SALE AND ADMIN
+    @GetMapping("/info")
+    public ResponseEntity<SaleInfo> findSaleInfo(Authentication authentication) {
+        try {
+            SaleInfo info = orderService.findSaleInfo();
+            log.info(String.format("API | GET --> /info  | Success with SaleInfo is :  %s --> ", info));
+            return ResponseEntity.ok(info);
+        } catch (Exception exception) {
+            log.error(String.format("API | GET --> /info  : Error Exception is  : %s --> ", exception.getMessage()));
+            return ResponseEntity.ofNullable(null);
+        }
+    }
+
+    // ONLY FOR ADMIN
+    @GetMapping("/users")
+    public ResponseEntity<List<UserDetail>> findAllUsersWithDetails(Authentication authentication) {
+        try {
+            List<UserDetail> allUserDetails = userService.findAllUsersWithDetails();
+            log.info(String.format("API | GET --> /users  | Success with users details is :  %s --> ", allUserDetails));
+            return ResponseEntity.ok(allUserDetails);
+        } catch (Exception exception) {
+            log.error(String.format("API | GET --> /users  : Error Exception is  : %s --> ", exception.getMessage()));
+            return ResponseEntity.ofNullable(null);
+        }
+    }
+
+    // ONLY FOR ADMIN, SALE AND CURRENT USER --> User should be able to see their own profile
+    @GetMapping("/users/userDetails")
+    public ResponseEntity<UserDetail> findUserDetails(@RequestParam("userId") String theUserId, Authentication authentication) {
+        try {
+            String currentUserId = authentication.getName();
+            String authenticationRoles = authentication.getAuthorities().toString();
+            boolean hasCustomerRole = userService.hasCustomerRole(authenticationRoles);
+            boolean hasSaleRole = userService.hasSaleRole(authenticationRoles);
+            boolean hasAdminRole = userService.hasAdminRole(authenticationRoles);
+
+            if (hasSaleRole || hasAdminRole) {
+                // See User Details
+                UserDetail theUserDetails = userService.findUserDetailById(theUserId);
+                log.info(String.format("API | GET --> /users  | Success with user's details is :  %s --> ", theUserDetails));
+                return ResponseEntity.ok(theUserDetails);
+            } else {
+                if (hasCustomerRole && currentUserId.equals(theUserId)) {
+                    // See own profile
+                    UserDetail myUserDetails = userService.findUserDetailById(theUserId);
+                    log.info(String.format("API | GET --> /users  | Success with my user's details is :  %s --> ", myUserDetails));
+                    return ResponseEntity.ok(myUserDetails);
+                } else {
+                    String errorMessage = "An error occurred : Unable to see other user's details.";
+                    log.error(String.format("API | GET --> /users  : Error Message is  : %s --> ", errorMessage));
+                    throw new RuntimeException(errorMessage);
+                }
+            }
+        } catch (Exception exception) {
+            log.error(String.format("API | GET --> /users  : Error Exception is  : %s --> ", exception.getMessage()));
+            return (ResponseEntity<UserDetail>) ResponseEntity.internalServerError();
         }
     }
 }

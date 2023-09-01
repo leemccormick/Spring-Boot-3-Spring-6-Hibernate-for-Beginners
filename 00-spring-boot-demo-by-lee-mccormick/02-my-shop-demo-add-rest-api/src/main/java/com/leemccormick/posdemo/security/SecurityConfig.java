@@ -46,6 +46,9 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/api/mystoredemo/products/**").hasAnyRole("SALE", "ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/api/mystoredemo/products/**").hasAnyRole("SALE", "ADMIN")
                                 .requestMatchers(HttpMethod.DELETE, "/api/mystoredemo/products/**").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/mystoredemo/info/**").hasAnyRole("SALE", "ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/mystoredemo/users").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/api/mystoredemo/users/userDetails").hasAnyRole("CUSTOMER", "SALE", "ADMIN")
                                 .anyRequest().authenticated()
                 )
                 .formLogin(form ->

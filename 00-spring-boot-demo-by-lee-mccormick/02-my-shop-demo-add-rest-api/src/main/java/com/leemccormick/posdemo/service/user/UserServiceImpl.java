@@ -83,6 +83,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDetail findUserDetailById(String theUserId) {
+        List<UserDetail> allUserDetails = findAllUsersWithDetails();
+        UserDetail nReturnUserDetail = null;
+        for (UserDetail theUserDetail : allUserDetails) {
+            if (theUserDetail.getUser().getId().equals(theUserId)) {
+                nReturnUserDetail = theUserDetail;
+            }
+        }
+        return nReturnUserDetail;
+    }
+
+    @Override
     public String findUserFullName(String theId) {
 
         User theUser = findById(theId);

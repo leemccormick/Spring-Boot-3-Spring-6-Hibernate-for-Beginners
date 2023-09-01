@@ -21,6 +21,8 @@ public interface UserService {
 
     User findById(String theId);
 
+    UserDetail findUserDetailById(String theUserId);
+
     String findUserFullName(String theId);
 
     String findRoles(String authenticationRoles);
