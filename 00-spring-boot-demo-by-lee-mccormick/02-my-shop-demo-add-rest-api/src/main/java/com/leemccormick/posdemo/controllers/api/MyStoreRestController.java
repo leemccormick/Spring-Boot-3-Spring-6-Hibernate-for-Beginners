@@ -1,9 +1,7 @@
 package com.leemccormick.posdemo.controllers.api;
 
-import com.leemccormick.posdemo.entity.OrderItem;
-import com.leemccormick.posdemo.entity.Product;
-import com.leemccormick.posdemo.entity.SaleInfo;
-import com.leemccormick.posdemo.entity.UserDetail;
+import com.leemccormick.posdemo.aspect.ApiErrorException;
+import com.leemccormick.posdemo.entity.*;
 import com.leemccormick.posdemo.service.order.OrderService;
 import com.leemccormick.posdemo.service.product.ProductService;
 import com.leemccormick.posdemo.service.user.UserService;
@@ -112,14 +110,17 @@ public class MyStoreRestController {
     }
 
     @DeleteMapping("/products/{productId}")
-    public ResponseEntity<Boolean> deleteProduct(@PathVariable int productId) {
+    public ResponseEntity<ApiResponse> deleteProduct(@PathVariable int productId) {
         try {
             productService.deleteById(productId);
             log.info(String.format("API | DELETE --> /products  | Success with Deleted Product Id is :  %s --> ", productId));
-            return ResponseEntity.ok(true);
+            ApiResponse successResponse = new ApiResponse(false);
+            return ResponseEntity.ok(successResponse);
         } catch (Exception exception) {
             log.error(String.format("API | DELETE --> /products  : Error Exception is  : %s --> ", exception.getMessage()));
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(false);
+            HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+            ApiResponse errorResponse = new ApiResponse(true, status.value(), exception.getMessage());
+            return ResponseEntity.status(status).body(errorResponse);
         }
     }
 
@@ -173,12 +174,12 @@ public class MyStoreRestController {
                 } else {
                     String errorMessage = "An error occurred : Unable to see other user's details.";
                     log.error(String.format("API | GET --> /users  : Error Message is  : %s --> ", errorMessage));
-                    throw new RuntimeException(errorMessage);
+                    throw new ApiErrorException(errorMessage, HttpStatus.METHOD_NOT_ALLOWED);
                 }
             }
         } catch (Exception exception) {
             log.error(String.format("API | GET --> /users  : Error Exception is  : %s --> ", exception.getMessage()));
-            return (ResponseEntity<UserDetail>) ResponseEntity.internalServerError();
+            throw new ApiErrorException(exception.getMessage());
         }
     }
 }

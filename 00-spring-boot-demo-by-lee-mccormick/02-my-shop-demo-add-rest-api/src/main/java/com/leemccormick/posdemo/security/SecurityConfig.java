@@ -1,5 +1,7 @@
 package com.leemccormick.posdemo.security;
 
+import com.leemccormick.posdemo.aspect.CustomAccessDeniedHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,6 +17,9 @@ import javax.sql.DataSource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    @Autowired
+    private CustomAccessDeniedHandler customAccessDeniedHandler;
+
     @Bean
     public UserDetailsManager userDetailsManager(DataSource dataSource) {
         // 1) Init Object
@@ -37,8 +42,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         // 1) Configure HTTP Authorization
-        http.authorizeHttpRequests(configurer ->
-                        configurer
+        http.authorizeHttpRequests(configure ->
+                        configure
                                 .requestMatchers("/").hasRole("CUSTOMER")
                                 .requestMatchers("/sellers/**").hasRole("SALE")
                                 .requestMatchers("/systems/**").hasRole("ADMIN")
@@ -60,9 +65,10 @@ public class SecurityConfig {
                 .logout(logout ->
                         logout.permitAll()
                 )
-                .exceptionHandling(configurer ->
-                        configurer
-                                .accessDeniedPage("/access-denied") // access-denied --> we can named it to anything else...
+                .exceptionHandling(configure ->
+                                configure
+                                        .accessDeniedHandler(customAccessDeniedHandler) // When user is not authorized then we go to this class instead of /access-denied.html
+                                        // .accessDeniedPage("/access-denied") --> This is original code to go to access-denied.html
                 );
 
         // 2) Use HTTP Basic authentication --> Need this line for Basic Auth in PostMan
