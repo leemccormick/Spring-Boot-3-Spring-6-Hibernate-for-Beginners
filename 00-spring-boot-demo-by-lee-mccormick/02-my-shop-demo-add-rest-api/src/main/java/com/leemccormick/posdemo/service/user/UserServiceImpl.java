@@ -6,6 +6,7 @@ import com.leemccormick.posdemo.entity.Role;
 import com.leemccormick.posdemo.entity.User;
 import com.leemccormick.posdemo.entity.UserDetail;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -140,5 +141,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public boolean hasAdminRole(String authenticationRoles) {
         return authenticationRoles.toLowerCase().contains("Admin".toLowerCase());
+    }
+
+    @Override
+    public boolean hasCustomerRole(Authentication authentication) {
+        return hasCustomerRole(authentication.getAuthorities().toString());
+    }
+
+    @Override
+    public boolean hasSaleRole(Authentication authentication) {
+        return hasSaleRole(authentication.getAuthorities().toString());
+
+    }
+
+    @Override
+    public boolean hasAdminRole(Authentication authentication) {
+        return hasAdminRole(authentication.getAuthorities().toString());
     }
 }

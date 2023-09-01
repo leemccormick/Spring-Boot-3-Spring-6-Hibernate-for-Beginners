@@ -2,6 +2,7 @@ package com.leemccormick.posdemo.service.user;
 
 import com.leemccormick.posdemo.entity.User;
 import com.leemccormick.posdemo.entity.UserDetail;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -32,4 +33,10 @@ public interface UserService {
     boolean hasSaleRole(String authenticationRoles);
 
     boolean hasAdminRole(String authenticationRoles);
+
+    boolean hasCustomerRole(Authentication authentication);
+
+    boolean hasSaleRole(Authentication authentication);
+
+    boolean hasAdminRole(Authentication authentication);
 }

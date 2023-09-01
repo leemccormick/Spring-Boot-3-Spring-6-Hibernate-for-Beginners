@@ -79,8 +79,32 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public List<Order> findAllOrdersByOrderStatus(String orderStatus) {
+        List<Order> allOrders = findAllOrders();
+        List<Order> nReturnOrders = new ArrayList<>();
+        for (Order order : allOrders) {
+            if (order.getStatus().equalsIgnoreCase(orderStatus)) {
+                nReturnOrders.add(order);
+            }
+        }
+        return nReturnOrders;
+    }
+
+    @Override
     public List<Order> findOrdersForCustomer(String customerId) {
         return orderDAO.findOrdersForTheCustomer(customerId);
+    }
+
+    @Override
+    public List<Order> findOrdersByOrderStatusForTheCustomer(String orderStatus, String customerId) {
+        List<Order> allOrdersForTheCustomer = findOrdersForCustomer(customerId);
+        List<Order> nReturnOrders = new ArrayList<>();
+        for (Order order : allOrdersForTheCustomer) {
+            if (order.getStatus().equalsIgnoreCase(orderStatus)) {
+                nReturnOrders.add(order);
+            }
+        }
+        return nReturnOrders;
     }
 
     @Override

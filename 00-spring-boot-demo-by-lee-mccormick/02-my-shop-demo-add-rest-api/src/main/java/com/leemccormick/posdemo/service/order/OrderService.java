@@ -15,7 +15,11 @@ public interface OrderService {
     // READ
     List<Order> findAllOrders();
 
+    List<Order> findAllOrdersByOrderStatus(String orderStatus);
+
     List<Order> findOrdersForCustomer(String customerId);
+
+    List<Order> findOrdersByOrderStatusForTheCustomer(String orderStatus, String customerId);
 
     Order findOrderById(int theId);
 
