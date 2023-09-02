@@ -34,6 +34,15 @@ public class OrderDAOImpl implements OrderDAO {
         entityManager.persist(theOrderItem);
     }
 
+    @Override
+    @Transactional
+    public Order saveItemToTheOrder(int theOrderId, OrderItem theOrderItem) {
+        Order theOrder = findTheOrderById(theOrderId);
+        theOrder.addItem(theOrderItem);
+        entityManager.merge(theOrder);
+        return theOrder;
+    }
+
     // READ
     @Override
     public List<Order> findOrdersForTheCustomer(String theCustomerId) {
@@ -65,6 +74,22 @@ public class OrderDAOImpl implements OrderDAO {
 
         // 3) Execute the query
         return query.getResultList();
+    }
+
+    @Override
+    public Order findTheOrderById(int theOrderId) {
+        // 1) Create query with JOIN FETCH
+        TypedQuery<Order> query = entityManager.createQuery(
+                "SELECT o FROM Order o " +
+                        "WHERE o.id = :theOrderId",
+                Order.class
+        );
+
+        // 2) Set Parameter
+        query.setParameter("theOrderId", theOrderId);
+
+        // 3) Execute the query
+        return query.getSingleResult();
     }
 
     // UPDATE

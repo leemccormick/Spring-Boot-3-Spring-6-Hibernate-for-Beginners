@@ -1,6 +1,7 @@
 package com.leemccormick.posdemo.service.order;
 
 import com.leemccormick.posdemo.entity.*;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -11,6 +12,7 @@ public interface OrderService {
     Order addNewItemToTheOrder(int theOrderId, OrderItem theOrderItem, String userId);
 
     Order addNewItemToTheOrder(int theOrderId, Product theProduce, String userId);
+    Order addNewItemToCart(int theOrderId, Product theProduce, String userId);
 
     // READ
     List<Order> findAllOrders();
@@ -43,6 +45,7 @@ public interface OrderService {
     Order addItemToOrderByIds(int theOrderId, int theOrderItemId);
 
     Order subtractItemToOrderByIds(int theOrderId, int theOrderItemId);
+    Order updateItemQuantityInTheCart(int theOrderId, int theOrderItemId, int theQuantity, String userId);
 
     Order checkOut(Order theOrder);
 
@@ -50,4 +53,5 @@ public interface OrderService {
     void deleteOrder(Order theOrder);
 
     void deleteOrderItem(OrderItem theOrderOrderItem);
+    Order deleteItemInTheCart(int theOrderItemId, int theOrderId,  Authentication authentication);
 }

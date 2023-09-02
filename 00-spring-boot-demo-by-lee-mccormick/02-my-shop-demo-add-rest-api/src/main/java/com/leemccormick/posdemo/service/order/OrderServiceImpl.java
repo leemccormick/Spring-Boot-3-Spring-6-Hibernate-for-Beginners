@@ -5,9 +5,11 @@ import com.leemccormick.posdemo.dao.Order.OrderRepository;
 import com.leemccormick.posdemo.dao.Order.OrderDAO;
 import com.leemccormick.posdemo.dao.ProductRepository;
 import com.leemccormick.posdemo.entity.*;
+import com.leemccormick.posdemo.service.user.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -22,17 +24,20 @@ public class OrderServiceImpl implements OrderService {
     private OrderItemRepository orderItemRepository;
     private OrderDAO orderDAO;
     private ProductRepository productRepository;
+    private UserService userService;
 
     @Autowired
     public OrderServiceImpl(OrderRepository theOrderRepository,
                             OrderItemRepository theOrderItemRepository,
                             OrderDAO theOrderDAO,
-                            ProductRepository theProductRepository
+                            ProductRepository theProductRepository,
+                            UserService theUserService
     ) {
         orderRepository = theOrderRepository;
         orderItemRepository = theOrderItemRepository;
         orderDAO = theOrderDAO;
         productRepository = theProductRepository;
+        userService = theUserService;
     }
 
     // CREATE
@@ -67,6 +72,43 @@ public class OrderServiceImpl implements OrderService {
             newOrderItem.setSubtotal(subtotalForItems);
             orderDAO.saveItemToOrder(theOrderId, newOrderItem);
             return updateTotalPrice(theOrderId, userId);
+        } else {
+            return findOrderById(theOrderId);
+        }
+    }
+
+    @Override
+    public Order addNewItemToCart(int theOrderId, Product theProduce, String userId) {
+        OrderItem newOrderItem = new OrderItem();
+
+        if (theProduce.getQuantity() > 1) {
+            newOrderItem.setOrderId(theOrderId);
+            newOrderItem.setProduct(theProduce);
+            newOrderItem.setQuantity(1);
+            double subtotalForItems = theProduce.getPrice() * 1;
+            newOrderItem.setSubtotal(subtotalForItems);
+
+
+            Order nReturnOrder = orderDAO.saveItemToTheOrder(theOrderId, newOrderItem);
+            // Order currentOrder = findOrderById(theOrderId);
+
+            // Find total price from items
+            double totalPrice = 0;
+            if (nReturnOrder.getItems() != null) {
+                if (!nReturnOrder.getItems().isEmpty()) {
+                    for (OrderItem item : nReturnOrder.getItems()) {
+                        totalPrice += item.getSubtotal();
+                    }
+                }
+            }
+
+            nReturnOrder.setUpdatedBy(userId);
+            nReturnOrder.setUpdatedDateTime(new Date());
+            nReturnOrder.setTotalAmount(totalPrice);
+            orderDAO.updateOrder(nReturnOrder);
+            return nReturnOrder;
+
+            //  return updateTotalPrice(theOrderId, userId);
         } else {
             return findOrderById(theOrderId);
         }
@@ -308,6 +350,50 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Order updateItemQuantityInTheCart(int theOrderId, int theOrderItemId, int theQuantity, String userId) {
+        try {
+            if (theQuantity > 0) {
+                OrderItem existingOrderItem = findOrderItemById(theOrderItemId);
+                Order existingOrder = findOrderById(theOrderId);
+                Optional<Product> existingProduct = productRepository.findById(existingOrderItem.getProduct().getId());
+
+                if (existingOrder.getCustomerId().equals(userId)) {
+                    if (existingOrder.getStatus().equals(OrderStatus.PENDING.getValue())) {
+                        if (existingProduct.isPresent()) {
+                            Product theProduct = existingProduct.get();
+                            // Make sure produce's quantity is more than theQuantity. and theQuantity is more than 0
+                            if (theProduct.getQuantity() > 0) {
+                                if (theProduct.getQuantity() >= theQuantity) {
+                                    double newSubtotal = theQuantity * existingOrderItem.getProduct().getPrice();
+                                    existingOrderItem.setQuantity(theQuantity);
+                                    existingOrderItem.setSubtotal(newSubtotal);
+                                    return updateOrderWithItem(existingOrder, existingOrderItem, existingOrder.getCustomerId());
+                                } else {
+                                    String errorMessage = "The quantity you order is more than the item's quantity we have in stock.";
+                                    errorMessage += "\n" + theProduct.getName() + " has " + theProduct.getQuantity() + " items.";
+                                    throw new RuntimeException(errorMessage);
+                                }
+                            } else {
+                                throw new RuntimeException(theProduct.getName() + " is out of stock.");
+                            }
+                        } else {
+                            throw new RuntimeException("Unable to find product detail to continue...");
+                        }
+                    } else {
+                        throw new RuntimeException("Only allowed to modify the order with pending status.");
+                    }
+                } else {
+                    throw new RuntimeException("Only allowed to customer to modify their own order.");
+                }
+            } else {
+                throw new RuntimeException("The quantity must be greater than 0.");
+            }
+        } catch (Exception exception) {
+            throw new RuntimeException(exception.getMessage());
+        }
+    }
+
+    @Override
     public Order checkOut(Order theOrder) {
         // Update Produce Quantity
         for (OrderItem item : theOrder.getItems()) {
@@ -363,6 +449,28 @@ public class OrderServiceImpl implements OrderService {
             orderDAO.deleteOrderItem(theOrderOrderItem);
         } catch (Exception exception) {
             log.error(String.format("OrderService : Exception deleteOrderItem is : %s -->  ", exception));
+            throw new RuntimeException(exception.getMessage());
+        }
+    }
+
+    @Override
+    public Order deleteItemInTheCart(int theOrderItemId, int theOrderId, Authentication authentication) {
+        try {
+            Order existingOrder = findOrderById(theOrderId);
+            if (existingOrder.getCustomerId().equals(authentication.getName()) || userService.hasAdminRole(authentication)) {
+                if (existingOrder.getStatus().equals(OrderStatus.PENDING.getValue())) {
+                    OrderItem itemToDelete = findOrderItemById(theOrderItemId);
+                    deleteOrderItem(itemToDelete);
+                    return updateTotalPrice(theOrderId, authentication.getName());
+                } else {
+                    throw new RuntimeException("Only allowed to delete the order item on pending order.");
+                }
+            } else {
+                throw new RuntimeException("Only allowed admin and the customer to delete the item on their own order.");
+            }
+        } catch (Exception exception) {
+            log.error(String.format("OrderService : Exception deleteOrderItem is : %s -->  ", exception));
+            throw new RuntimeException(exception.getMessage());
         }
     }
 }

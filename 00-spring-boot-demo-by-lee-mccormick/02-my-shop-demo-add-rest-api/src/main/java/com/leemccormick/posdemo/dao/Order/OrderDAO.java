@@ -11,10 +11,14 @@ public interface OrderDAO {
 
     void saveItemToOrder(int theOrderId, OrderItem theOrderItem);
 
+    Order saveItemToTheOrder(int theOrderId, OrderItem theOrderItem);
+
     // READ
     List<Order> findOrdersForTheCustomer(String theCustomerId);
 
     List<Order> findOrdersForTheCustomerByOrderStatus(String theCustomerId, String theStatus);
+
+    Order findTheOrderById(int theOrderId);
 
     // UPDATE
     void updateOrder(Order theOrder);

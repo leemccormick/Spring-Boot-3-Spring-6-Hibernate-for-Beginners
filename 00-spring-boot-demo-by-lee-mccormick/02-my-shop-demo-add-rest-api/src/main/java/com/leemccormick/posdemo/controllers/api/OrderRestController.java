@@ -1,11 +1,15 @@
 package com.leemccormick.posdemo.controllers.api;
 
 import com.leemccormick.posdemo.aspect.ApiErrorException;
+import com.leemccormick.posdemo.entity.ApiResponse;
 import com.leemccormick.posdemo.entity.Order;
+import com.leemccormick.posdemo.entity.OrderItem;
+import com.leemccormick.posdemo.entity.Product;
 import com.leemccormick.posdemo.service.order.OrderService;
 import com.leemccormick.posdemo.service.product.ProductService;
 import com.leemccormick.posdemo.service.user.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -146,6 +150,109 @@ public class OrderRestController {
             }
         } catch (ApiErrorException exception) {
             throw new ApiErrorException(exception.getMessage(), exception.getHttpStatus());
+        } catch (Exception exception) {
+            throw new ApiErrorException(exception.getMessage());
+        }
+    }
+
+    @PostMapping("/addItemToCart") // Only customer can add item to cart
+    public ResponseEntity<Order> addItemToCart(@RequestParam(name = "productId", required = true) int theProductId,
+                                               Authentication authentication
+    ) {
+        try {
+            Order currentOrder = orderService.findPendingOrderForTheCustomer(authentication.getName());
+            Product theProduct = productService.findById(theProductId);
+
+            if (theProduct.getQuantity() > 0) {
+                if (currentOrder != null) {
+                    if (currentOrder.getCustomerId().equals(authentication.getName())) {
+                        if (currentOrder.getItems().isEmpty()) {
+                            currentOrder = orderService.addNewItemToCart(currentOrder.getId(), theProduct, authentication.getName());
+                            log.info(String.format("ORDER API /addItemToCart : AFTER SUCCESSFULLY ADD TO CART : Current Order  is : %s --> ", currentOrder));
+                            return ResponseEntity.ok(currentOrder);
+                        } else {
+                            boolean isTheNewItem = true;
+
+                            OrderItem orderItemToUpdate = new OrderItem();
+
+                            for (OrderItem item : currentOrder.getItems()) {
+                                if (item.getProductId() == theProduct.getId()) {
+                                    isTheNewItem = false;
+                                    orderItemToUpdate = item;
+                                    break;
+                                }
+                            }
+
+                            if (isTheNewItem) {
+                                currentOrder = orderService.addNewItemToCart(currentOrder.getId(), theProduct, authentication.getName());
+                                log.info(String.format("ORDER API /addItemToCart : AFTER SUCCESSFULLY ADD TO CART : Current Order  is : %s --> ", currentOrder));
+                                return ResponseEntity.ok(currentOrder);
+                            } else {
+                                int newQuantity = orderItemToUpdate.getQuantity() + 1;
+                                double newSubtotal = newQuantity * theProduct.getPrice();
+                                orderItemToUpdate.setQuantity(newQuantity);
+                                orderItemToUpdate.setSubtotal(newSubtotal);
+
+                                if (theProduct.getQuantity() >= newQuantity) {
+                                    currentOrder = orderService.updateOrderWithItem(currentOrder, orderItemToUpdate, authentication.getName());
+                                    log.info(String.format("ORDER API /addItemToCart : AFTER SUCCESSFULLY ADD TO CART : Current Order  is : %s --> ", currentOrder));
+                                    return ResponseEntity.ok(currentOrder);
+                                } else {
+                                    String errorMessage = "Out of stock, item's quantity in the stock is less than your order.";
+                                    errorMessage += "\nThe product name : " + theProduct.getName() + ". Quantity : " + theProduct.getQuantity();
+                                    log.error(String.format("ORDER API /addItemToCart  : ERROR ADD TO CART : %s | Current Order  is : %s --> ", errorMessage, currentOrder));
+                                    throw new ApiErrorException(errorMessage, HttpStatus.BAD_REQUEST);
+                                }
+                            }
+                        }
+                    } else { // Only customer can modify or add item to their order
+                        String errorMessage = "Only the customer who started this order can modify or add item to their order";
+                        log.error(String.format("ORDER API /addItemToCart  : ERROR ADD TO CART : %s | Current Order  is : %s --> ", errorMessage, currentOrder));
+                        throw new ApiErrorException(errorMessage, HttpStatus.METHOD_NOT_ALLOWED);
+                    }
+                } else { // Create new Order and add the first item, if current order is null
+                    Order savedOrder = orderService.addNewOrder(new Order(), authentication.getName());
+                    currentOrder = orderService.addNewItemToCart(savedOrder.getId(), theProduct, authentication.getName());
+                    log.info(String.format("ORDER API /addItemToCart : AFTER SUCCESSFULLY ADD TO CART : Current Order  is : %s --> ", currentOrder));
+                    return ResponseEntity.ok(currentOrder);
+                }
+            } else {
+                String errorMessage = "Out of stock, item's quantity in the stock is out.";
+                errorMessage += "\nThe product name : " + theProduct.getName() + ". Quantity : " + theProduct.getQuantity();
+                log.error(String.format("ORDER API /addItemToCart  : ERROR ADD TO CART : %s | Current Order  is : %s --> ", errorMessage, currentOrder));
+                throw new ApiErrorException(errorMessage, HttpStatus.BAD_REQUEST);
+            }
+        } catch (ApiErrorException exception) {
+            throw new ApiErrorException(exception.getMessage(), exception.getHttpStatus());
+        } catch (Exception exception) {
+            throw new ApiErrorException(exception.getMessage());
+        }
+    }
+
+    @PostMapping("/updateItemQuantityInTheCart") // Only customer can update their cart
+    public ResponseEntity<Order> updateItemQuantityInTheCart(@RequestParam(name = "orderId", required = true) int theOrderId,
+                                                             @RequestParam(name = "orderItemId", required = true) int theOrderItemId,
+                                                             @RequestParam(name = "quantity", required = true) int theQuantity,
+                                                             Authentication authentication) {
+        try {
+            Order updatedOrder = orderService.updateItemQuantityInTheCart(theOrderId, theOrderItemId, theQuantity, authentication.getName());
+            return ResponseEntity.ok(updatedOrder);
+        } catch (ApiErrorException exception) {
+            throw new ApiErrorException(exception.getMessage(), exception.getHttpStatus());
+        } catch (Exception exception) {
+            throw new ApiErrorException(exception.getMessage());
+        }
+    }
+
+    @DeleteMapping("/deleteItemInTheCart") // Only customer can delete item in their cart
+    public ResponseEntity<ApiResponse> deleteItemInTheCart(@RequestParam(name = "orderId", required = true) int theOrderId,
+                                                           @RequestParam(name = "orderItemId", required = true) int theOrderItemId,
+                                                           Authentication authentication) {
+        try {
+            Order deletedOrder = orderService.deleteItemInTheCart(theOrderItemId, theOrderId, authentication);
+            String message = "Successfully delete the item on this order." + deletedOrder.toString();
+            ApiResponse response = new ApiResponse(false, message);
+            return ResponseEntity.ok(response);
         } catch (Exception exception) {
             throw new ApiErrorException(exception.getMessage());
         }

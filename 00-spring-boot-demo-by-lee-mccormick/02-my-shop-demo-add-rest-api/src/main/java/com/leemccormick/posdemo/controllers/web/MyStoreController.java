@@ -239,7 +239,7 @@ public class MyStoreController {
     }
 
     @GetMapping("/addToCart")
-    public String addItemToCard(@RequestParam("productId") int theProductId, Authentication authentication) {
+    public String addItemToCart(@RequestParam("productId") int theProductId, Authentication authentication) {
         Product theProduct = productService.findById(theProductId);
 
         if (currentOrder != null) {

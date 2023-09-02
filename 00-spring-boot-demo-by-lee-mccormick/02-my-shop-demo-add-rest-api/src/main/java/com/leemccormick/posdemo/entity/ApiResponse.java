@@ -29,6 +29,18 @@ public class ApiResponse {
         }
     }
 
+    public ApiResponse(boolean isError, String successMessage) {
+        if (isError) {
+            this.status = "error";
+            this.code = 500;
+            this.message = "Unknown error, something went wrong.";
+        } else {
+            status = "success";
+            this.code = 200;
+            this.message = successMessage;
+        }
+    }
+
     public String getStatus() {
         return status;
     }
