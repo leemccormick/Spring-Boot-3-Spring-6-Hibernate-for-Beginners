@@ -12,6 +12,7 @@ public interface OrderService {
     Order addNewItemToTheOrder(int theOrderId, OrderItem theOrderItem, String userId);
 
     Order addNewItemToTheOrder(int theOrderId, Product theProduce, String userId);
+
     Order addNewItemToCart(int theOrderId, Product theProduce, String userId);
 
     // READ
@@ -45,13 +46,21 @@ public interface OrderService {
     Order addItemToOrderByIds(int theOrderId, int theOrderItemId);
 
     Order subtractItemToOrderByIds(int theOrderId, int theOrderItemId);
+
     Order updateItemQuantityInTheCart(int theOrderId, int theOrderItemId, int theQuantity, String userId);
 
     Order checkOut(Order theOrder);
+
+    Order validateAndCheckOut(Order theOrder, Authentication authentication);
+
+    Order updateOrderStatus(int theOrderId, Authentication authentication, OrderStatus status);
 
     // DELETE
     void deleteOrder(Order theOrder);
 
     void deleteOrderItem(OrderItem theOrderOrderItem);
-    Order deleteItemInTheCart(int theOrderItemId, int theOrderId,  Authentication authentication);
+
+    Order deleteItemInTheCart(int theOrderItemId, int theOrderId, Authentication authentication);
+
+    void deleteOrder(int theOrderId, Authentication authentication);
 }

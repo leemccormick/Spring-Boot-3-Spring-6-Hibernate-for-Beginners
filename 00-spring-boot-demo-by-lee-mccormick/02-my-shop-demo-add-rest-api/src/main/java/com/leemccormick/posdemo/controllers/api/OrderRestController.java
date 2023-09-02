@@ -1,15 +1,11 @@
 package com.leemccormick.posdemo.controllers.api;
 
 import com.leemccormick.posdemo.aspect.ApiErrorException;
-import com.leemccormick.posdemo.entity.ApiResponse;
-import com.leemccormick.posdemo.entity.Order;
-import com.leemccormick.posdemo.entity.OrderItem;
-import com.leemccormick.posdemo.entity.Product;
+import com.leemccormick.posdemo.entity.*;
 import com.leemccormick.posdemo.service.order.OrderService;
 import com.leemccormick.posdemo.service.product.ProductService;
 import com.leemccormick.posdemo.service.user.UserService;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -253,6 +249,83 @@ public class OrderRestController {
             String message = "Successfully delete the item on this order." + deletedOrder.toString();
             ApiResponse response = new ApiResponse(false, message);
             return ResponseEntity.ok(response);
+        } catch (Exception exception) {
+            throw new ApiErrorException(exception.getMessage());
+        }
+    }
+
+    @PostMapping("/checkout")
+    public ResponseEntity<Order> checkoutOrder(@RequestBody Order theOrder, Authentication authentication) {
+        try {
+            Order checkoutOrdered = orderService.validateAndCheckOut(theOrder, authentication);
+            return ResponseEntity.ok(checkoutOrdered);
+        } catch (ApiErrorException exception) {
+            throw new ApiErrorException(exception.getMessage(), exception.getHttpStatus());
+        } catch (Exception exception) {
+            throw new ApiErrorException(exception.getMessage());
+        }
+    }
+
+    @PutMapping("/updateOrderStatusToProcessing")
+    public ResponseEntity<ApiResponse> updateOrderStatusToProcessing(@RequestParam("orderId") int theOrderId, Authentication authentication) {
+        try {
+            Order updatedOrder = orderService.updateOrderStatus(theOrderId, authentication, OrderStatus.PROCESSING);
+            ApiResponse response = new ApiResponse(false, "Successfully updated order status to " + updatedOrder.getStatus());
+            return ResponseEntity.ok(response);
+        } catch (ApiErrorException exception) {
+            throw new ApiErrorException(exception.getMessage(), exception.getHttpStatus());
+        } catch (Exception exception) {
+            throw new ApiErrorException(exception.getMessage());
+        }
+    }
+
+    @PutMapping("/updateOrderStatusToShipped")
+    public ResponseEntity<ApiResponse> updateOrderStatusToShipped(@RequestParam("orderId") int theOrderId, Authentication authentication) {
+        try {
+            Order updatedOrder = orderService.updateOrderStatus(theOrderId, authentication, OrderStatus.SHIPPED);
+            ApiResponse response = new ApiResponse(false, "Successfully updated order status to " + updatedOrder.getStatus());
+            return ResponseEntity.ok(response);
+        } catch (ApiErrorException exception) {
+            throw new ApiErrorException(exception.getMessage(), exception.getHttpStatus());
+        } catch (Exception exception) {
+            throw new ApiErrorException(exception.getMessage());
+        }
+    }
+
+    @PutMapping("/updateOrderStatusToDelivered")
+    public ResponseEntity<ApiResponse> updateOrderStatusToDelivered(@RequestParam("orderId") int theOrderId, Authentication authentication) {
+        try {
+            Order updatedOrder = orderService.updateOrderStatus(theOrderId, authentication, OrderStatus.DELIVERED);
+            ApiResponse response = new ApiResponse(false, "Successfully updated order status to " + updatedOrder.getStatus());
+            return ResponseEntity.ok(response);
+        } catch (ApiErrorException exception) {
+            throw new ApiErrorException(exception.getMessage(), exception.getHttpStatus());
+        } catch (Exception exception) {
+            throw new ApiErrorException(exception.getMessage());
+        }
+    }
+
+    @PutMapping("/updateOrderStatusToCancelled")
+    public ResponseEntity<ApiResponse> updateOrderStatusToCancelled(@RequestParam("orderId") int theOrderId, Authentication authentication) {
+        try {
+            Order updatedOrder = orderService.updateOrderStatus(theOrderId, authentication, OrderStatus.CANCELLED);
+            ApiResponse response = new ApiResponse(false, "Successfully updated order status from to " + updatedOrder.getStatus());
+            return ResponseEntity.ok(response);
+        } catch (ApiErrorException exception) {
+            throw new ApiErrorException(exception.getMessage(), exception.getHttpStatus());
+        } catch (Exception exception) {
+            throw new ApiErrorException(exception.getMessage());
+        }
+    }
+
+    @DeleteMapping("/deleteOrder")
+    public ResponseEntity<ApiResponse> deleteOrder(@RequestParam("orderId") int theOrderId, Authentication authentication) {
+        try {
+            orderService.deleteOrder(theOrderId, authentication);
+            ApiResponse response = new ApiResponse(false, "Successfully deleted order with id : " + theOrderId);
+            return ResponseEntity.ok(response);
+        } catch (ApiErrorException exception) {
+            throw new ApiErrorException(exception.getMessage(), exception.getHttpStatus());
         } catch (Exception exception) {
             throw new ApiErrorException(exception.getMessage());
         }

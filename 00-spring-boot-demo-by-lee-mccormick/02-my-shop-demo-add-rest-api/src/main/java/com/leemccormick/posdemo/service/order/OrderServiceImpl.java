@@ -8,7 +8,6 @@ import com.leemccormick.posdemo.entity.*;
 import com.leemccormick.posdemo.service.user.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -80,17 +79,15 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order addNewItemToCart(int theOrderId, Product theProduce, String userId) {
         OrderItem newOrderItem = new OrderItem();
-
         if (theProduce.getQuantity() > 1) {
+            newOrderItem.setProductId(theProduce.getId());
             newOrderItem.setOrderId(theOrderId);
             newOrderItem.setProduct(theProduce);
             newOrderItem.setQuantity(1);
             double subtotalForItems = theProduce.getPrice() * 1;
             newOrderItem.setSubtotal(subtotalForItems);
 
-
             Order nReturnOrder = orderDAO.saveItemToTheOrder(theOrderId, newOrderItem);
-            // Order currentOrder = findOrderById(theOrderId);
 
             // Find total price from items
             double totalPrice = 0;
@@ -107,8 +104,6 @@ public class OrderServiceImpl implements OrderService {
             nReturnOrder.setTotalAmount(totalPrice);
             orderDAO.updateOrder(nReturnOrder);
             return nReturnOrder;
-
-            //  return updateTotalPrice(theOrderId, userId);
         } else {
             return findOrderById(theOrderId);
         }
@@ -395,17 +390,113 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order checkOut(Order theOrder) {
-        // Update Produce Quantity
-        for (OrderItem item : theOrder.getItems()) {
-            Product theProduct = item.getProduct();
-            int newProductQuantity = theProduct.getQuantity() - item.getQuantity();
-            theProduct.setQuantity(newProductQuantity);
-            productRepository.save(theProduct);
-        }
+        try {
+            // Update Produce Quantity
+            List<OrderItem> newOrderItems = new ArrayList<>();
+            for (OrderItem item : theOrder.getItems()) {
+                OrderItem updatedItem = updateEachProductQuantityWhenCustomerCheckoutWithItem(item.getProductId(), item);
+                newOrderItems.add(updatedItem);
+            }
 
-        // Update Order Status and return the updated order
-        theOrder.setStatus(OrderStatus.PROCESSING.getValue());
-        return updateOrder(theOrder, theOrder.getCustomerId());
+            // Update Order Status and return the updated order
+            theOrder.setItems(newOrderItems);
+            theOrder.setStatus(OrderStatus.PROCESSING.getValue());
+            Order theLastUpdatedOrder = updateTotalPrice(theOrder);
+            return updateOrder(theLastUpdatedOrder, theOrder.getCustomerId());
+        } catch (Exception exception) {
+            throw new RuntimeException(exception.getMessage());
+        }
+    }
+
+    @Override
+    public Order validateAndCheckOut(Order theOrder, Authentication authentication) {
+        Order existingOrder = findOrderById(theOrder.getId());
+        if (existingOrder == null) {
+            throw new RuntimeException("Unable to find order with id  " + theOrder.getId());
+        } else {
+            if (theOrder.getCustomerId().equals(authentication.getName())) {
+                if (theOrder.getStatus().equals(OrderStatus.PENDING.getValue()) &&
+                        theOrder.getStatus().equals(existingOrder.getStatus())
+                ) {
+                    ErrorResponse validationResponse = validateOrderBeforeProcessing(theOrder);
+                    if (validationResponse.getHasError()) {
+                        StringBuilder errorMessages = new StringBuilder("Error checking out : ");
+                        for (String message : validationResponse.getErrorMessages()) {
+                            errorMessages.append(" ").append(message);
+                        }
+                        throw new RuntimeException(errorMessages.toString());
+                    } else {
+                        return checkOut(theOrder);
+                    }
+                } else {
+                    throw new RuntimeException("The order status is " + theOrder.getStatus() + ". Only pending order is allow to process check out.");
+                }
+            } else {
+                throw new RuntimeException("Only current user who created this order are allow to check out.");
+            }
+        }
+    }
+
+    @Override
+    public Order updateOrderStatus(int theOrderId, Authentication authentication, OrderStatus status) {
+        try {
+            if (userService.hasAdminRole(authentication) || userService.hasSaleRole(authentication)) {
+                Order existingOrder = findOrderById(theOrderId);
+                if (existingOrder != null) {
+                    if (existingOrder.getStatus().equals(OrderStatus.PENDING.getValue())) {
+                        throw new RuntimeException("Unable to update pending orders.");
+                    } else if (existingOrder.getStatus().equals(status.getValue())) {
+                        throw new RuntimeException("The status is the same as existing status.");
+                    } else {
+                        if (status.getValue().equals(OrderStatus.CANCELLED.getValue())) {
+                            if (userService.hasAdminRole(authentication)) {
+                                existingOrder.setStatus(OrderStatus.CANCELLED.getValue());
+                                return updateOrder(existingOrder, authentication.getName());
+                            } else {
+                                throw new RuntimeException("Only admin allowed to cancel the order.");
+                            }
+                        } else {
+                            existingOrder.setStatus(status.getValue());
+                            return updateOrder(existingOrder, authentication.getName());
+                        }
+                    }
+                } else {
+                    throw new RuntimeException("Unable to find order with id  " + theOrderId);
+                }
+            } else {
+                throw new RuntimeException("Only sales and admins are able to update order status.");
+            }
+        } catch (Exception exception) {
+            throw new RuntimeException(exception.getMessage());
+        }
+    }
+
+    private OrderItem updateEachProductQuantityWhenCustomerCheckoutWithItem(int theProductId, OrderItem item) {
+        Optional<Product> existingProduct = productRepository.findById(theProductId);
+        if (existingProduct.isPresent()) {
+            Product theProduct = existingProduct.get();
+
+            if (item.getQuantity() > theProduct.getQuantity()) {
+                String errorMessage = "The quantity you order is more than the item's quantity we have in stock.";
+                errorMessage += "\n" + theProduct.getName() + " has " + theProduct.getQuantity() + " items.";
+                throw new RuntimeException(errorMessage);
+            } else {
+                int newProductQuantity = theProduct.getQuantity() - item.getQuantity();
+                theProduct.setQuantity(newProductQuantity);
+                item.setProduct(theProduct);
+                productRepository.save(theProduct);
+
+                if (item.getSubtotal() == item.getQuantity() * theProduct.getPrice()) {
+                    return item;
+                } else {
+                    double newSubtotal = item.getQuantity() * theProduct.getPrice();
+                    item.setSubtotal(newSubtotal);
+                    return item;
+                }
+            }
+        } else {
+            throw new RuntimeException("Unable to find product with id : " + theProductId);
+        }
     }
 
     private Order updateTotalPrice(int theOrderId, String userId) {
@@ -422,6 +513,23 @@ public class OrderServiceImpl implements OrderService {
         }
 
         currentOrder.setUpdatedBy(userId);
+        currentOrder.setUpdatedDateTime(new Date());
+        currentOrder.setTotalAmount(totalPrice);
+        orderDAO.updateOrder(currentOrder);
+        return currentOrder;
+    }
+
+    private Order updateTotalPrice(Order currentOrder) {
+        // Find total price from items
+        double totalPrice = 0;
+        if (currentOrder.getItems() != null) {
+            if (!currentOrder.getItems().isEmpty()) {
+                for (OrderItem item : currentOrder.getItems()) {
+                    totalPrice += item.getSubtotal();
+                }
+            }
+        }
+
         currentOrder.setUpdatedDateTime(new Date());
         currentOrder.setTotalAmount(totalPrice);
         orderDAO.updateOrder(currentOrder);
@@ -470,6 +578,28 @@ public class OrderServiceImpl implements OrderService {
             }
         } catch (Exception exception) {
             log.error(String.format("OrderService : Exception deleteOrderItem is : %s -->  ", exception));
+            throw new RuntimeException(exception.getMessage());
+        }
+    }
+
+    @Override
+    public void deleteOrder(int theOrderId, Authentication authentication) {
+        try {
+            if (userService.hasAdminRole(authentication)) {
+                Order existingOrder = findOrderById(theOrderId);
+                if (existingOrder != null) {
+                    if (!existingOrder.getStatus().equals(OrderStatus.PENDING.getValue())) {
+                        throw new RuntimeException("Only allow to delete the pending order. This order status is " + existingOrder.getStatus());
+                    } else {
+                        deleteOrder(existingOrder);
+                    }
+                } else {
+                    throw new RuntimeException("Unable to find order with id  " + theOrderId);
+                }
+            } else {
+                throw new RuntimeException("Only admins are able to delete orders.");
+            }
+        } catch (Exception exception) {
             throw new RuntimeException(exception.getMessage());
         }
     }
