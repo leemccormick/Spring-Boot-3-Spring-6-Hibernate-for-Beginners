@@ -1,5 +1,6 @@
 package com.leemccormick.posdemo.controllers.api;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.leemccormick.posdemo.aspect.ApiErrorException;
 import com.leemccormick.posdemo.entity.*;
 import com.leemccormick.posdemo.service.order.OrderService;
@@ -13,7 +14,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/mystoredemo/orders")
@@ -22,15 +25,18 @@ public class OrderRestController {
     private OrderService orderService;
     private ProductService productService;
     private UserService userService;
+    private ObjectMapper objectMapper;
 
     @Autowired
     public OrderRestController(OrderService theOrderService,
                                ProductService theProductService,
-                               UserService theUserService
+                               UserService theUserService,
+                               ObjectMapper theObjectMapper
     ) {
         orderService = theOrderService;
         productService = theProductService;
         userService = theUserService;
+        objectMapper = theObjectMapper;
     }
 
     @GetMapping("/all") // Get all orders for SALE and ADMIN --> If added param will return order based on status
@@ -144,6 +150,40 @@ public class OrderRestController {
                     throw new ApiErrorException("User is not allowed to see this order details.", HttpStatus.METHOD_NOT_ALLOWED);
                 }
             }
+        } catch (ApiErrorException exception) {
+            throw new ApiErrorException(exception.getMessage(), exception.getHttpStatus());
+        } catch (Exception exception) {
+            throw new ApiErrorException(exception.getMessage());
+        }
+    }
+
+    @GetMapping(value = "/pendingOrder", produces = "application/json")
+    // Look for last pending order for customer to display total items in the cart
+    public ResponseEntity<String> findPendingOrder(Authentication authentication) {
+        try {
+            Order currentOrder = orderService.findPendingOrderForTheCustomer(authentication.getName());
+            Map<String, Object> data = new HashMap<>();
+
+            if (currentOrder != null) {
+                data.put("pendingOrderId", currentOrder.getId());
+                data.put("customerId", currentOrder.getCustomerId());
+                if (!currentOrder.getItems().isEmpty()) {
+                    int itemsInOrder = 0;
+                    for (OrderItem item : currentOrder.getItems()) {
+                        itemsInOrder += item.getQuantity();
+                    }
+                    data.put("totalItems", itemsInOrder);
+                    data.put("showCheckOutAction", true);
+                } else {
+                    data.put("totalItems", 0);
+                    data.put("showCheckOutAction", false);
+                }
+            } else {
+                data.put("totalItems", 0);
+                data.put("showCheckOutAction", false);
+            }
+            log.info(String.format("ORDER API /pendingOrder : AFTER SUCCESSFULLY FIND PENDING ORDER : data  is : %s --> ", data));
+            return ResponseEntity.ok(objectMapper.writeValueAsString(data));
         } catch (ApiErrorException exception) {
             throw new ApiErrorException(exception.getMessage(), exception.getHttpStatus());
         } catch (Exception exception) {
