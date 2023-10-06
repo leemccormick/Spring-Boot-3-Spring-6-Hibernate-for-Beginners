@@ -157,8 +157,7 @@ public class OrderRestController {
         }
     }
 
-    @GetMapping(value = "/pendingOrder", produces = "application/json")
-    // Look for last pending order for customer to display total items in the cart
+    @GetMapping(value = "/pendingOrder", produces = "application/json") // Look for last pending order for customer to display total items in the cart
     public ResponseEntity<String> findPendingOrder(Authentication authentication) {
         try {
             Order currentOrder = orderService.findPendingOrderForTheCustomer(authentication.getName());
