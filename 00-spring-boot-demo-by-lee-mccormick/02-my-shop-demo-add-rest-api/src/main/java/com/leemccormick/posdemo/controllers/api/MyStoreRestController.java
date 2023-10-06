@@ -33,6 +33,25 @@ public class MyStoreRestController {
         userService = theUserService;
     }
 
+    @GetMapping("/authentication")
+    public ResponseEntity<UserDetail> authenticationUser(Authentication authentication) {
+        try {
+            String currentUserId = authentication.getName();
+            UserDetail myUserDetails = userService.findUserDetailById(currentUserId);
+            if (myUserDetails != null) {
+                log.info(String.format("API | GET --> /users  | Success with my user's details is :  %s --> ", myUserDetails));
+                return ResponseEntity.ok(myUserDetails);
+            } else {
+                String errorMessage = "An error occurred : Unable to find user in database";
+                log.error(String.format("API | GET --> /users  : Error Message is  : %s --> ", errorMessage));
+                throw new ApiErrorException(errorMessage, HttpStatus.NOT_FOUND);
+            }
+        } catch (Exception exception) {
+            log.error(String.format("API | GET --> /products  : Error Exception is  : %s --> ", exception));
+            return ResponseEntity.ofNullable(null);
+        }
+    }
+
     @GetMapping("/products")
     public ResponseEntity<List<Product>> findProducts(Authentication authentication) {
         try {
@@ -163,14 +182,26 @@ public class MyStoreRestController {
             if (hasSaleRole || hasAdminRole) {
                 // See User Details
                 UserDetail theUserDetails = userService.findUserDetailById(theUserId);
-                log.info(String.format("API | GET --> /users  | Success with user's details is :  %s --> ", theUserDetails));
-                return ResponseEntity.ok(theUserDetails);
+                if (theUserDetails != null) {
+                    log.info(String.format("API | GET --> /users  | Success with user's details is :  %s --> ", theUserDetails));
+                    return ResponseEntity.ok(theUserDetails);
+                } else {
+                    String errorMessage = "An error occurred : Unable to find user in database with user id : " + theUserId;
+                    log.error(String.format("API | GET --> /users  : Error Message is  : %s --> ", errorMessage));
+                    throw new ApiErrorException(errorMessage, HttpStatus.NOT_FOUND);
+                }
             } else {
                 if (hasCustomerRole && currentUserId.equals(theUserId)) {
                     // See own profile
                     UserDetail myUserDetails = userService.findUserDetailById(theUserId);
-                    log.info(String.format("API | GET --> /users  | Success with my user's details is :  %s --> ", myUserDetails));
-                    return ResponseEntity.ok(myUserDetails);
+                    if (myUserDetails != null) {
+                        log.info(String.format("API | GET --> /users  | Success with my user's details is :  %s --> ", myUserDetails));
+                        return ResponseEntity.ok(myUserDetails);
+                    } else {
+                        String errorMessage = "An error occurred : Unable to find user in database";
+                        log.error(String.format("API | GET --> /users  : Error Message is  : %s --> ", errorMessage));
+                        throw new ApiErrorException(errorMessage, HttpStatus.NOT_FOUND);
+                    }
                 } else {
                     String errorMessage = "An error occurred : Unable to see other user's details.";
                     log.error(String.format("API | GET --> /users  : Error Message is  : %s --> ", errorMessage));

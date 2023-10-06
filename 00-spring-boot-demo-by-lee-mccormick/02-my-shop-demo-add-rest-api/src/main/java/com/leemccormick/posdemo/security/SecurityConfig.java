@@ -1,6 +1,7 @@
 package com.leemccormick.posdemo.security;
 
 import com.leemccormick.posdemo.aspect.CustomAccessDeniedHandler;
+import com.leemccormick.posdemo.aspect.CustomAuthenticationEntryPoint;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,8 @@ import javax.sql.DataSource;
 public class SecurityConfig {
     @Autowired
     private CustomAccessDeniedHandler customAccessDeniedHandler;
+    @Autowired
+    private CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
     @Bean
     public UserDetailsManager userDetailsManager(DataSource dataSource) {
@@ -67,8 +70,9 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(configure ->
                                 configure
+                                        .authenticationEntryPoint(customAuthenticationEntryPoint) // Set your custom entry point
                                         .accessDeniedHandler(customAccessDeniedHandler) // When user is not authorized then we go to this class instead of /access-denied.html
-                                        // .accessDeniedPage("/access-denied") --> This is original code to go to access-denied.html
+                        // .accessDeniedPage("/access-denied") --> This is original code to go to access-denied.html
                 );
 
         // 2) Use HTTP Basic authentication --> Need this line for Basic Auth in PostMan
