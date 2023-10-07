@@ -1,11 +1,13 @@
 package com.leemccormick.posdemo.controllers.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.leemccormick.posdemo.aspect.ApiErrorException;
 import com.leemccormick.posdemo.entity.*;
 import com.leemccormick.posdemo.service.order.OrderService;
 import com.leemccormick.posdemo.service.product.ProductService;
 import com.leemccormick.posdemo.service.user.UserService;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -157,32 +159,34 @@ public class OrderRestController {
         }
     }
 
+    private String getOrderWithDetails(Order currentOrder) throws JsonProcessingException {
+        Map<String, Object> combinedData = new HashMap<>();
+        int itemsInOrder = 0;
+        for (OrderItem item : currentOrder.getItems()) {
+            itemsInOrder += item.getQuantity();
+        }
+        combinedData.put("order", currentOrder);
+        combinedData.put("totalItems", itemsInOrder);
+        combinedData.put("showCheckOutAction", itemsInOrder > 0);
+        combinedData.put("status", "success");
+        return objectMapper.writeValueAsString(combinedData);
+    }
+
     @GetMapping(value = "/pendingOrder", produces = "application/json") // Look for last pending order for customer to display total items in the cart
     public ResponseEntity<String> findPendingOrder(Authentication authentication) {
         try {
             Order currentOrder = orderService.findPendingOrderForTheCustomer(authentication.getName());
-            Map<String, Object> data = new HashMap<>();
-
             if (currentOrder != null) {
-                data.put("pendingOrderId", currentOrder.getId());
-                data.put("customerId", currentOrder.getCustomerId());
-                if (!currentOrder.getItems().isEmpty()) {
-                    int itemsInOrder = 0;
-                    for (OrderItem item : currentOrder.getItems()) {
-                        itemsInOrder += item.getQuantity();
-                    }
-                    data.put("totalItems", itemsInOrder);
-                    data.put("showCheckOutAction", true);
-                } else {
-                    data.put("totalItems", 0);
-                    data.put("showCheckOutAction", false);
-                }
+                log.info(String.format("ORDER API /pendingOrder : AFTER SUCCESSFULLY FIND PENDING ORDER : currentOrder  is : %s --> ", currentOrder));
+                return ResponseEntity.ok(getOrderWithDetails(currentOrder));
             } else {
+                Map<String, Object> data = new HashMap<>();
+                data.put("order", null);
                 data.put("totalItems", 0);
                 data.put("showCheckOutAction", false);
+                log.info(String.format("ORDER API /pendingOrder : AFTER SUCCESSFULLY FIND PENDING ORDER : data  is : %s --> ", data));
+                return ResponseEntity.ok(objectMapper.writeValueAsString(data));
             }
-            log.info(String.format("ORDER API /pendingOrder : AFTER SUCCESSFULLY FIND PENDING ORDER : data  is : %s --> ", data));
-            return ResponseEntity.ok(objectMapper.writeValueAsString(data));
         } catch (ApiErrorException exception) {
             throw new ApiErrorException(exception.getMessage(), exception.getHttpStatus());
         } catch (Exception exception) {
@@ -190,8 +194,9 @@ public class OrderRestController {
         }
     }
 
-    @PostMapping("/addItemToCart") // Only customer can add item to cart
-    public ResponseEntity<Order> addItemToCart(@RequestParam(name = "productId", required = true) int theProductId,
+    @PostMapping(value = "/addItemToCart", produces = "application/json") // Only customer can add item to cart
+    @Transactional
+    public ResponseEntity<String> addItemToCart(@RequestParam(name = "productId", required = true) int theProductId,
                                                Authentication authentication
     ) {
         try {
@@ -204,7 +209,7 @@ public class OrderRestController {
                         if (currentOrder.getItems().isEmpty()) {
                             currentOrder = orderService.addNewItemToCart(currentOrder.getId(), theProduct, authentication.getName());
                             log.info(String.format("ORDER API /addItemToCart : AFTER SUCCESSFULLY ADD TO CART : Current Order  is : %s --> ", currentOrder));
-                            return ResponseEntity.ok(currentOrder);
+                            return ResponseEntity.ok(getOrderWithDetails(currentOrder));
                         } else {
                             boolean isTheNewItem = true;
 
@@ -221,7 +226,7 @@ public class OrderRestController {
                             if (isTheNewItem) {
                                 currentOrder = orderService.addNewItemToCart(currentOrder.getId(), theProduct, authentication.getName());
                                 log.info(String.format("ORDER API /addItemToCart : AFTER SUCCESSFULLY ADD TO CART : Current Order  is : %s --> ", currentOrder));
-                                return ResponseEntity.ok(currentOrder);
+                                return ResponseEntity.ok(getOrderWithDetails(currentOrder));
                             } else {
                                 int newQuantity = orderItemToUpdate.getQuantity() + 1;
                                 double newSubtotal = newQuantity * theProduct.getPrice();
@@ -231,7 +236,7 @@ public class OrderRestController {
                                 if (theProduct.getQuantity() >= newQuantity) {
                                     currentOrder = orderService.updateOrderWithItem(currentOrder, orderItemToUpdate, authentication.getName());
                                     log.info(String.format("ORDER API /addItemToCart : AFTER SUCCESSFULLY ADD TO CART : Current Order  is : %s --> ", currentOrder));
-                                    return ResponseEntity.ok(currentOrder);
+                                    return ResponseEntity.ok(getOrderWithDetails(currentOrder));
                                 } else {
                                     String errorMessage = "Out of stock, item's quantity in the stock is less than your order.";
                                     errorMessage += "\nThe product name : " + theProduct.getName() + ". Quantity : " + theProduct.getQuantity();
@@ -249,7 +254,7 @@ public class OrderRestController {
                     Order savedOrder = orderService.addNewOrder(new Order(), authentication.getName());
                     currentOrder = orderService.addNewItemToCart(savedOrder.getId(), theProduct, authentication.getName());
                     log.info(String.format("ORDER API /addItemToCart : AFTER SUCCESSFULLY ADD TO CART : Current Order  is : %s --> ", currentOrder));
-                    return ResponseEntity.ok(currentOrder);
+                    return ResponseEntity.ok(getOrderWithDetails(currentOrder));
                 }
             } else {
                 String errorMessage = "Out of stock, item's quantity in the stock is out.";

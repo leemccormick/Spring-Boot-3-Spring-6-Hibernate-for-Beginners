@@ -140,6 +140,7 @@
     <table class="table table-bordered table-striped">
         <thead class="table-dark">
         <tr>
+            <th th:if="${hasSaleRole || hasAdminRole}">Product ID</th>
             <th>Product Name</th>
             <th>Description</th>
             <th>Price Per Unit</th>
@@ -151,6 +152,7 @@
         <tbody>
         <tr th:each="tempProduct : ${products}">
             <!-- Detail Section For Product -->
+            <td th:if="${hasSaleRole || hasAdminRole}" th:text="${tempProduct.id}"></td>
             <td th:text="${tempProduct.name}"></td>
             <td th:text="${tempProduct.description}"></td>
             <td th:text="${tempProduct.price}"></td>
