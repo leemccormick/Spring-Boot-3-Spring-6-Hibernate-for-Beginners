@@ -63,7 +63,7 @@ public class OrderServiceImpl implements OrderService {
     public Order addNewItemToTheOrder(int theOrderId, Product theProduce, String userId) {
         OrderItem newOrderItem = new OrderItem();
 
-        if (theProduce.getQuantity() > 1) {
+        if (theProduce.getQuantity() > 0) {
             newOrderItem.setOrderId(theOrderId);
             newOrderItem.setProduct(theProduce);
             newOrderItem.setQuantity(1);
@@ -79,7 +79,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Order addNewItemToCart(int theOrderId, Product theProduce, String userId) {
         OrderItem newOrderItem = new OrderItem();
-        if (theProduce.getQuantity() > 1) {
+
+        if (theProduce.getQuantity() > 0) {
             newOrderItem.setProductId(theProduce.getId());
             newOrderItem.setOrderId(theOrderId);
             newOrderItem.setProduct(theProduce);

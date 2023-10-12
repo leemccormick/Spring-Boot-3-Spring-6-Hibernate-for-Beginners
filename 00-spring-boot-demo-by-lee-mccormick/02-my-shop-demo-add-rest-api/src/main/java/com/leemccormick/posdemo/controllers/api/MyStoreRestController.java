@@ -1,5 +1,7 @@
 package com.leemccormick.posdemo.controllers.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.leemccormick.posdemo.aspect.ApiErrorException;
 import com.leemccormick.posdemo.entity.*;
 import com.leemccormick.posdemo.service.order.OrderService;
@@ -10,10 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/mystoredemo")
@@ -22,15 +27,18 @@ public class MyStoreRestController {
     private OrderService orderService;
     private ProductService productService;
     private UserService userService;
+    private ObjectMapper objectMapper;
 
     @Autowired
     public MyStoreRestController(OrderService theOrderService,
                                  ProductService theProductService,
-                                 UserService theUserService
+                                 UserService theUserService,
+                                 ObjectMapper theObjectMapper
     ) {
         orderService = theOrderService;
         productService = theProductService;
         userService = theUserService;
+        objectMapper = theObjectMapper;
     }
 
     @GetMapping("/authentication")
@@ -87,22 +95,31 @@ public class MyStoreRestController {
         }
     }
 
-    @PostMapping("/products")
-    public ResponseEntity<String> addProduct(@RequestBody Product theProduct, Authentication authentication) {
+    @Transactional
+    @PostMapping(value = "/products", produces = "application/json")
+    public ResponseEntity<String> addProduct(@RequestBody Product theProduct, Authentication authentication) throws JsonProcessingException {
         try {
             theProduct.setCreatedBy(authentication.getName());
             productService.save(theProduct);
+            ApiResponse response = new ApiResponse(false, "Successfully Added New Product.");
+            Map<String, Object> combinedData = new HashMap<>();
+            combinedData.put("status", response.getStatus());
+            combinedData.put("code", response.getCode());
+            combinedData.put("message", response.getMessage());
+            combinedData.put("product", theProduct);
             log.info(String.format("API | POST --> /products  | Success with New Product is :  %s --> ", theProduct));
-            return ResponseEntity.ok("Successfully Add New Product : " + theProduct);
+            return ResponseEntity.ok(objectMapper.writeValueAsString(combinedData));
         } catch (Exception exception) {
             String errorMessage = "Failed to add new product. Error Exception is " + exception.getMessage();
+            ApiResponse errorResponse = new ApiResponse(true, HttpStatus.INTERNAL_SERVER_ERROR.value(), errorMessage);
             log.error(String.format("API | POST --> /products  : Error Exception is  : %s --> ", errorMessage));
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorMessage);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(objectMapper.writeValueAsString(errorResponse));
         }
     }
 
-    @PutMapping("/products")
-    public ResponseEntity<Product> updateProduct(@RequestBody Product theProduct, Authentication authentication) {
+    @Transactional
+    @PutMapping(value = "/products", produces = "application/json")
+    public ResponseEntity<String> updateProduct(@RequestBody Product theProduct, Authentication authentication) throws JsonProcessingException {
         try {
             Product existingProduct = productService.findById(theProduct.getId());
             theProduct.setUpdatedBy(authentication.getName());
@@ -118,13 +135,20 @@ public class MyStoreRestController {
             if (theProduct.getPrice() == null || theProduct.getPrice().isNaN()) {
                 theProduct.setPrice(existingProduct.getPrice());
             }
-
             productService.update(theProduct);
+            ApiResponse response = new ApiResponse(false, "Successfully Updated Product.");
+            Map<String, Object> combinedData = new HashMap<>();
+            combinedData.put("status", response.getStatus());
+            combinedData.put("code", response.getCode());
+            combinedData.put("message", response.getMessage());
+            combinedData.put("product", theProduct);
             log.info(String.format("API | PUT --> /products  | Success with New Product is :  %s --> ", theProduct));
-            return ResponseEntity.ok(theProduct);
+            return ResponseEntity.ok(objectMapper.writeValueAsString(combinedData));
         } catch (Exception exception) {
+            String errorMessage = "Failed to update product. Error Exception is " + exception.getMessage();
+            ApiResponse errorResponse = new ApiResponse(true, HttpStatus.INTERNAL_SERVER_ERROR.value(), errorMessage);
             log.error(String.format("API | PUT --> /products  : Error Exception is  : %s --> ", exception.getMessage()));
-            return (ResponseEntity<Product>) ResponseEntity.internalServerError();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(objectMapper.writeValueAsString(errorResponse));
         }
     }
 

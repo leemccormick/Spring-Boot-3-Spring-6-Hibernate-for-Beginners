@@ -63,16 +63,44 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void save(Product theProduct) {
-        theProduct.setCreatedDateTime(new Date());
-        productRepository.save(theProduct);
+        if (theProduct.getName().isEmpty() || theProduct.getName().length() < 2) {
+            throw new RuntimeException("Invalid Product Name ! Product name should be greater than 2 characters. Product Name is : " + theProduct.getName());
+        } else if (theProduct.getDescription().isEmpty() || theProduct.getDescription().length() < 2) {
+            throw new RuntimeException("Invalid Product Description ! Product Description should be greater than 2 characters. Product Description is : " + theProduct.getDescription());
+        } else if (theProduct.getPrice() <= 0 || theProduct.getPrice().isNaN()) {
+            throw new RuntimeException("Invalid Product Price ! Product Price should be greater than $0. Product Price is : " + theProduct.getPrice());
+        } else if (theProduct.getQuantity() < 0) {
+            throw new RuntimeException("Invalid Product Quantity ! Product Quantity should be greater than 0. Product Quantity is : " + theProduct.getQuantity());
+        } else {
+            List<Product> listOfProduct = findAllProduct();
+            if (!listOfProduct.isEmpty()) {
+                for (Product existingtProduct : listOfProduct) {
+                    if (existingtProduct.getName().equals(theProduct.getName())) {
+                        throw new RuntimeException("Invalid Product Name ! This product name is already existing in database. Product Name is : " + theProduct.getName() + " , and Product ID : " + existingtProduct.getId());
+                    }
+                }
+            }
+            theProduct.setCreatedDateTime(new Date());
+            productRepository.save(theProduct);
+        }
     }
 
     @Override
     public void update(Product theProduct) {
-        Product existingProduct = findById(theProduct.getId());
-        theProduct.setCreatedBy(existingProduct.getCreatedBy());
-        theProduct.setCreatedDateTime(existingProduct.getCreatedDateTime());
-        theProduct.setUpdatedDateTime(new Date());
-        productRepository.save(theProduct);
+        if (theProduct.getName().isEmpty() || theProduct.getName().length() < 2) {
+            throw new RuntimeException("Invalid Product Name ! Product name should be greater than 2 characters. Product Name is : " + theProduct.getName());
+        } else if (theProduct.getDescription().isEmpty() || theProduct.getDescription().length() < 2) {
+            throw new RuntimeException("Invalid Product Description ! Product Description should be greater than 2 characters. Product Description is : " + theProduct.getDescription());
+        } else if (theProduct.getPrice() <= 0 || theProduct.getPrice().isNaN()) {
+            throw new RuntimeException("Invalid Product Price ! Product Price should be greater than $0. Product Price is : " + theProduct.getPrice());
+        } else if (theProduct.getQuantity() < 0) {
+            throw new RuntimeException("Invalid Product Quantity ! Product Quantity should be greater than 0. Product Quantity is : " + theProduct.getQuantity());
+        } else {
+            Product existingProduct = findById(theProduct.getId());
+            theProduct.setCreatedBy(existingProduct.getCreatedBy());
+            theProduct.setCreatedDateTime(existingProduct.getCreatedDateTime());
+            theProduct.setUpdatedDateTime(new Date());
+            productRepository.save(theProduct);
+        }
     }
 }

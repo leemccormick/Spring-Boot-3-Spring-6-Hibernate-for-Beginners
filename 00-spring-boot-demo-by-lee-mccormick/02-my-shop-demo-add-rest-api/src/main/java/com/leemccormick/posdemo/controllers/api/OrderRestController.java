@@ -41,6 +41,19 @@ public class OrderRestController {
         objectMapper = theObjectMapper;
     }
 
+    private String getOrderWithDetails(Order currentOrder) throws JsonProcessingException {
+        Map<String, Object> combinedData = new HashMap<>();
+        int itemsInOrder = 0;
+        for (OrderItem item : currentOrder.getItems()) {
+            itemsInOrder += item.getQuantity();
+        }
+        combinedData.put("order", currentOrder);
+        combinedData.put("totalItems", itemsInOrder);
+        combinedData.put("showCheckOutAction", itemsInOrder > 0);
+        combinedData.put("status", "success");
+        return objectMapper.writeValueAsString(combinedData);
+    }
+
     @GetMapping("/all") // Get all orders for SALE and ADMIN --> If added param will return order based on status
     public ResponseEntity<List<Order>> findAllOrders(Authentication authentication,
                                                      @RequestParam(name = "status", required = false) String orderStatus
@@ -159,20 +172,8 @@ public class OrderRestController {
         }
     }
 
-    private String getOrderWithDetails(Order currentOrder) throws JsonProcessingException {
-        Map<String, Object> combinedData = new HashMap<>();
-        int itemsInOrder = 0;
-        for (OrderItem item : currentOrder.getItems()) {
-            itemsInOrder += item.getQuantity();
-        }
-        combinedData.put("order", currentOrder);
-        combinedData.put("totalItems", itemsInOrder);
-        combinedData.put("showCheckOutAction", itemsInOrder > 0);
-        combinedData.put("status", "success");
-        return objectMapper.writeValueAsString(combinedData);
-    }
-
-    @GetMapping(value = "/pendingOrder", produces = "application/json") // Look for last pending order for customer to display total items in the cart
+    // Look for last pending order for customer to display total items in the cart
+    @GetMapping(value = "/pendingOrder", produces = "application/json")
     public ResponseEntity<String> findPendingOrder(Authentication authentication) {
         try {
             Order currentOrder = orderService.findPendingOrderForTheCustomer(authentication.getName());
@@ -197,7 +198,7 @@ public class OrderRestController {
     @PostMapping(value = "/addItemToCart", produces = "application/json") // Only customer can add item to cart
     @Transactional
     public ResponseEntity<String> addItemToCart(@RequestParam(name = "productId", required = true) int theProductId,
-                                               Authentication authentication
+                                                Authentication authentication
     ) {
         try {
             Order currentOrder = orderService.findPendingOrderForTheCustomer(authentication.getName());
@@ -269,14 +270,16 @@ public class OrderRestController {
         }
     }
 
-    @PostMapping("/updateItemQuantityInTheCart") // Only customer can update their cart
-    public ResponseEntity<Order> updateItemQuantityInTheCart(@RequestParam(name = "orderId", required = true) int theOrderId,
-                                                             @RequestParam(name = "orderItemId", required = true) int theOrderItemId,
-                                                             @RequestParam(name = "quantity", required = true) int theQuantity,
-                                                             Authentication authentication) {
+    // Only customer can update their cart
+    @Transactional
+    @PostMapping(value = "/updateItemQuantityInTheCart", produces = "application/json")
+    public ResponseEntity<String> updateItemQuantityInTheCart(@RequestParam(name = "orderId", required = true) int theOrderId,
+                                                              @RequestParam(name = "orderItemId", required = true) int theOrderItemId,
+                                                              @RequestParam(name = "quantity", required = true) int theQuantity,
+                                                              Authentication authentication) {
         try {
             Order updatedOrder = orderService.updateItemQuantityInTheCart(theOrderId, theOrderItemId, theQuantity, authentication.getName());
-            return ResponseEntity.ok(updatedOrder);
+            return ResponseEntity.ok(getOrderWithDetails(updatedOrder));
         } catch (ApiErrorException exception) {
             throw new ApiErrorException(exception.getMessage(), exception.getHttpStatus());
         } catch (Exception exception) {
@@ -284,25 +287,42 @@ public class OrderRestController {
         }
     }
 
-    @DeleteMapping("/deleteItemInTheCart") // Only customer can delete item in their cart
-    public ResponseEntity<ApiResponse> deleteItemInTheCart(@RequestParam(name = "orderId", required = true) int theOrderId,
-                                                           @RequestParam(name = "orderItemId", required = true) int theOrderItemId,
-                                                           Authentication authentication) {
+    // Only customer can delete item in their cart
+    @DeleteMapping(value = "/deleteItemInTheCart", produces = "application/json")
+    public ResponseEntity<String> deleteItemInTheCart(@RequestParam(name = "orderId", required = true) int theOrderId,
+                                                      @RequestParam(name = "orderItemId", required = true) int theOrderItemId,
+                                                      Authentication authentication) {
         try {
             Order deletedOrder = orderService.deleteItemInTheCart(theOrderItemId, theOrderId, authentication);
-            String message = "Successfully delete the item on this order." + deletedOrder.toString();
-            ApiResponse response = new ApiResponse(false, message);
-            return ResponseEntity.ok(response);
+            ApiResponse response = new ApiResponse(false, "Successfully delete the item on this order.");
+            Map<String, Object> combinedData = new HashMap<>();
+            int itemsInOrder = 0;
+            for (OrderItem item : deletedOrder.getItems()) {
+                itemsInOrder += item.getQuantity();
+            }
+            combinedData.put("response", response);
+            combinedData.put("order", deletedOrder);
+            combinedData.put("totalItems", itemsInOrder);
+            combinedData.put("showCheckOutAction", itemsInOrder > 0);
+            combinedData.put("status", "success");
+            return ResponseEntity.ok(objectMapper.writeValueAsString(combinedData));
         } catch (Exception exception) {
             throw new ApiErrorException(exception.getMessage());
         }
     }
 
-    @PostMapping("/checkout")
-    public ResponseEntity<Order> checkoutOrder(@RequestBody Order theOrder, Authentication authentication) {
+    @Transactional
+    @PostMapping(value = "/checkout", produces = "application/json")
+    public ResponseEntity<String> checkoutOrder(@RequestBody Order theOrder, Authentication authentication) {
         try {
             Order checkoutOrdered = orderService.validateAndCheckOut(theOrder, authentication);
-            return ResponseEntity.ok(checkoutOrdered);
+            ApiResponse response = new ApiResponse(false, "Successfully checkout the order with id :" + theOrder.getId());
+            Map<String, Object> combinedData = new HashMap<>();
+            combinedData.put("response", response);
+            combinedData.put("order", checkoutOrdered);
+            combinedData.put("showCheckOutAction", false);
+            combinedData.put("status", "success");
+            return ResponseEntity.ok(objectMapper.writeValueAsString(combinedData));
         } catch (ApiErrorException exception) {
             throw new ApiErrorException(exception.getMessage(), exception.getHttpStatus());
         } catch (Exception exception) {
