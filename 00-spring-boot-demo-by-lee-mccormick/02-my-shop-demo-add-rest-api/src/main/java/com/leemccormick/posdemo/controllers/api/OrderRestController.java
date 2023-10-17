@@ -88,14 +88,14 @@ public class OrderRestController {
                 if (orderStatus != null) {
                     myOrders = orderService.findOrdersByOrderStatusForTheCustomer(orderStatus, authentication.getName());
                     if (myOrders.isEmpty()) {
-                        throw new ApiErrorException("There is no " + orderStatus + " order history for your account.", HttpStatus.NOT_FOUND);
+                        return ResponseEntity.ok(new ArrayList<>());
                     } else {
                         return ResponseEntity.ok(myOrders);
                     }
                 } else {
                     myOrders = orderService.findOrdersForCustomer(authentication.getName());
                     if (myOrders.isEmpty()) {
-                        throw new ApiErrorException("There is no order history for your account.", HttpStatus.NOT_FOUND);
+                        return ResponseEntity.ok(new ArrayList<>());
                     } else {
                         return ResponseEntity.ok(myOrders);
                     }
