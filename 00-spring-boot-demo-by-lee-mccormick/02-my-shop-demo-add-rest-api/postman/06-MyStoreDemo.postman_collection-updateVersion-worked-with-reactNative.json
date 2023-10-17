@@ -1,0 +1,1121 @@
+{
+	"info": {
+		"_postman_id": "7ac439e5-3d22-4e3e-b91d-45abda22d62b",
+		"name": "MyStoreDemo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26590147"
+	},
+	"item": [
+		{
+			"name": "products",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": []
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/products",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "authentication",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "lee",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": []
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/authentication",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"authentication"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "addProduct",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n        \"name\": \"Lime Test9\",\n        \"description\": \"ball added by api on postman\",\n        \"price\": 2.0,\n        \"quantity\": 8\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/products",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateProduct",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "sally",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "   {\n     \"id\": 37,\n     \"name\": \"Test change name\",\n     \"description\": \"test football description\",\n     \"price\": 3,\n     \"quantity\": -1\n    }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/products",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "deleteProduct",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/products/36",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"products",
+						"36"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "productById",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "lee",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/products/productDetails?productId=34",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"products",
+						"productDetails"
+					],
+					"query": [
+						{
+							"key": "productId",
+							"value": "34"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "salesInfo",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "sally",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/info",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"info"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "allUsersDetails",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "userDetailsByUserId",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/users/userDetails?userId=4f3598dc-42ce-11ee-8c3f-2841cb38b8f1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"users",
+						"userDetails"
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "4f3598dc-42ce-11ee-8c3f-2841cb38b8f1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "allOrders",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/orders/all",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"orders",
+						"all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "allOrdersWithStatus",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/orders/all?status=cancelled",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"orders",
+						"all"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "cancelled"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "myOrders",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "lee",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/orders/myOrders",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"orders",
+						"myOrders"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "myOrdersWithStatus",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "lee",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/orders/myOrders?status=pendding",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"orders",
+						"myOrders"
+					],
+					"query": [
+						{
+							"key": "status",
+							"value": "pendding"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "userOrdersByUserIdByStatus",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/orders/userOrders?userId=4f3587de-42ce-11ee-8c3f-2841cb38b8f1&status=delivered",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"orders",
+						"userOrders"
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "4f3587de-42ce-11ee-8c3f-2841cb38b8f1"
+						},
+						{
+							"key": "status",
+							"value": "delivered"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "userOrdersByUserId",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/orders/userOrders?userId=4f3587de-42ce-11ee-8c3f-2841cb38b8f1&=",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"orders",
+						"userOrders"
+					],
+					"query": [
+						{
+							"key": "userId",
+							"value": "4f3587de-42ce-11ee-8c3f-2841cb38b8f1"
+						},
+						{
+							"key": "",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "orderDetails",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "sally",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/orders/details/62",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"orders",
+						"details",
+						"62"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "addItemToCart",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "lee",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/orders/addItemToCart?productId=34",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"orders",
+						"addItemToCart"
+					],
+					"query": [
+						{
+							"key": "productId",
+							"value": "34"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateItemQuantityInTheCart",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "lee",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/orders/updateItemQuantityInTheCart?orderId=62&orderItemId=217&quantity=8",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"orders",
+						"updateItemQuantityInTheCart"
+					],
+					"query": [
+						{
+							"key": "orderId",
+							"value": "62"
+						},
+						{
+							"key": "orderItemId",
+							"value": "217"
+						},
+						{
+							"key": "quantity",
+							"value": "8"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "checkout",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "lee",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"id\": 67,\n  \"customerId\": \"4f3587de-42ce-11ee-8c3f-2841cb38b8f1\",\n  \"totalAmount\": 10,\n  \"status\": \"Pending\",\n  \"createdDateTime\": \"2023-10-09T05:00:00.000+00:00\",\n  \"updatedDateTime\": \"2023-10-09T05:00:00.000+00:00\",\n  \"createdBy\": \"4f3587de-42ce-11ee-8c3f-2841cb38b8f1\",\n  \"updatedBy\": \"4f3587de-42ce-11ee-8c3f-2841cb38b8f1\",\n  \"items\": [\n    {\n      \"id\": 229,\n      \"orderId\": 67,\n      \"productId\": 31,\n      \"quantity\": 1,\n      \"subtotal\": 10,\n      \"product\": {\n        \"id\": 31,\n        \"name\": \"soap aga\",\n        \"description\": \"update by admin\",\n        \"price\": 10,\n        \"createdDateTime\": \"2023-08-24T05:00:00.000+00:00\",\n        \"updatedDateTime\": \"2023-08-30T05:00:00.000+00:00\",\n        \"createdBy\": \"Sally\",\n        \"updatedBy\": \"4f359a12-42ce-11ee-8c3f-2841cb38b8f1\",\n        \"quantity\": 2\n      }\n    }\n  ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/orders/checkout",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"orders",
+						"checkout"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "deleteItemInTheCart",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "lee",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/orders/deleteItemInTheCart?orderItemId=218&orderId=62",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"orders",
+						"deleteItemInTheCart"
+					],
+					"query": [
+						{
+							"key": "orderItemId",
+							"value": "218"
+						},
+						{
+							"key": "orderId",
+							"value": "62"
+						},
+						{
+							"key": "",
+							"value": "",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateOrderStatusToProcessing",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "sally",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/orders/updateOrderStatusToProcessing?orderId=0000",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"orders",
+						"updateOrderStatusToProcessing"
+					],
+					"query": [
+						{
+							"key": "orderId",
+							"value": "0000"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateOrderStatusToShipped",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "sally",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/orders/updateOrderStatusToShipped?orderId=29",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"orders",
+						"updateOrderStatusToShipped"
+					],
+					"query": [
+						{
+							"key": "orderId",
+							"value": "29"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateOrderStatusToDelivered",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "sally",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/orders/updateOrderStatusToDelivered?orderId=54",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"orders",
+						"updateOrderStatusToDelivered"
+					],
+					"query": [
+						{
+							"key": "orderId",
+							"value": "54"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "updateOrderStatusToCancelled",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/orders/updateOrderStatusToCancelled?orderId=58",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"orders",
+						"updateOrderStatusToCancelled"
+					],
+					"query": [
+						{
+							"key": "orderId",
+							"value": "58"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "deleteOrder",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "admin",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/orders/deleteOrder?orderId=59",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"orders",
+						"deleteOrder"
+					],
+					"query": [
+						{
+							"key": "orderId",
+							"value": "59"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "pendingOrder",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "lee",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "fun123",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/api/mystoredemo/orders/pendingOrder",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"api",
+						"mystoredemo",
+						"orders",
+						"pendingOrder"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
